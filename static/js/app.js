@@ -311,17 +311,17 @@
       }).map(function (company) {
         var logoUrl = "https://www.google.com/s2/favicons?domain=" + encodeURIComponent(company.domain || "") + "&sz=32";
         return (
-          "<div class=\"company-reference-item rounded-2xl border border-line bg-page/30 px-4 py-3\" data-company-item=\"" + escapeHtml(company.id) + "\">" +
-            "<div class=\"flex items-center gap-3\">" +
-              "<label class=\"flex min-w-0 flex-1 cursor-pointer items-center gap-3\">" +
-                "<input data-company-id=\"" + escapeHtml(company.id) + "\" type=\"checkbox\" class=\"h-4 w-4 shrink-0\">" +
+          "<div class=\"company-reference-item company-card rounded-2xl border border-line bg-page/30\" data-company-item=\"" + escapeHtml(company.id) + "\">" +
+            "<label class=\"company-card-label\">" +
+              "<input data-company-id=\"" + escapeHtml(company.id) + "\" type=\"checkbox\" class=\"mt-1 h-4 w-4 shrink-0\">" +
+              "<span class=\"company-card-meta\">" +
                 "<img src=\"" + logoUrl + "\" alt=\"\" width=\"24\" height=\"24\" class=\"shrink-0 rounded\" loading=\"lazy\">" +
-                "<span class=\"truncate text-sm font-medium text-ink\">" + escapeHtml(company.name) + "</span>" +
-              "</label>" +
-              "<button type=\"button\" data-company-trigger=\"" + escapeHtml(company.id) + "\" aria-expanded=\"false\" class=\"company-reference-trigger shrink-0 rounded-full border border-line bg-white/5 px-2 py-1 text-[0.7rem] font-semibold text-ink/85\">" +
-                "<span class=\"company-reference-mark\">" + escapeHtml(translations[lang].companyReferences) + "</span>" +
-              "</button>" +
-            "</div>" +
+                "<span class=\"company-card-name text-sm font-medium text-ink\">" + escapeHtml(company.name) + "</span>" +
+              "</span>" +
+            "</label>" +
+            "<button type=\"button\" data-company-trigger=\"" + escapeHtml(company.id) + "\" aria-expanded=\"false\" class=\"company-reference-trigger company-card-trigger shrink-0 rounded-full border border-line bg-white/5 px-3 py-2 text-[0.7rem] font-semibold text-ink/85\">" +
+              "<span class=\"company-reference-mark\">" + escapeHtml(translations[lang].companyReferences) + "</span>" +
+            "</button>" +
           "</div>"
         );
       }).join("");
@@ -329,7 +329,7 @@
       return (
         "<div class=\"space-y-3\">" +
           "<h3 class=\"text-xs uppercase tracking-[0.2em] text-muted\">" + escapeHtml(labels[category]) + "</h3>" +
-          "<div class=\"space-y-3\">" + items + "</div>" +
+          "<div class=\"company-group-grid\">" + items + "</div>" +
         "</div>"
       );
     }).join("");
