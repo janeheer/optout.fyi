@@ -1478,6 +1478,14 @@
     res_about_title: { en: "About this tool", es: "Acerca de esta herramienta" },
     res_about_p: { en: "optout.fyi generates template letters based on published California statutes (CCPA/CPRA). It is not legal advice and does not create an attorney-client relationship.", es: "optout.fyi genera cartas basadas en leyes publicadas de California (CCPA/CPRA). No es asesor\u00eda legal." },
     res_inspired: { en: "Inspired by the ILRC Red Cards \u2014 know your rights, assert your rights.", es: "Inspirado en las Tarjetas Rojas del ILRC \u2014 conoce tus derechos, ejerce tus derechos." },
+    landing_local_only: { en: "Nothing you type is sent to a server. Everything stays in your browser.", es: "Nada de lo que escribas se env\u00eda a un servidor. Todo permanece en tu navegador." },
+    skip_to_main: { en: "Skip to main content", es: "Saltar al contenido principal" },
+    nav_letter: { en: "Letter", es: "Carta" },
+    nav_guide: { en: "Guide", es: "Gu\u00eda" },
+    nav_resources: { en: "Resources", es: "Recursos" },
+    footer_made_with_haste: { en: "Made with haste.", es: "Hecho con prisa." },
+    footer_contact: { en: "Contact", es: "Contacto" },
+    footer_source: { en: "Source", es: "C\u00f3digo fuente" },
     // Footer
     footer_zero: { en: "Zero data collected. Everything runs in your browser.", es: "Cero datos recopilados. Todo funciona en tu navegador." }
   };
