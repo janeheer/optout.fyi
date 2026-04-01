@@ -312,16 +312,15 @@
         var logoUrl = "https://www.google.com/s2/favicons?domain=" + encodeURIComponent(company.domain || "") + "&sz=32";
         return (
           "<div class=\"company-reference-item company-card rounded-2xl border border-line bg-page/30\" data-company-item=\"" + escapeHtml(company.id) + "\">" +
-            "<label class=\"company-card-label\">" +
-              "<input data-company-id=\"" + escapeHtml(company.id) + "\" type=\"checkbox\" class=\"mt-1 h-4 w-4 shrink-0\">" +
-              "<span class=\"company-card-meta\">" +
-                "<img src=\"" + logoUrl + "\" alt=\"\" width=\"24\" height=\"24\" class=\"shrink-0 rounded\" loading=\"lazy\">" +
-                "<span class=\"company-card-name text-sm font-medium text-ink\">" + escapeHtml(company.name) + "</span>" +
-              "</span>" +
-            "</label>" +
-            "<button type=\"button\" data-company-trigger=\"" + escapeHtml(company.id) + "\" aria-expanded=\"false\" class=\"company-reference-trigger company-card-trigger shrink-0 rounded-full border border-line bg-white/5 px-3 py-2 text-[0.7rem] font-semibold text-ink/85\">" +
-              "<span class=\"company-reference-mark\">" + escapeHtml(translations[lang].companyReferences) + "</span>" +
-            "</button>" +
+            "<div class=\"company-card-row\">" +
+              "<input data-company-id=\"" + escapeHtml(company.id) + "\" type=\"checkbox\" class=\"company-card-checkbox\">" +
+              "<button type=\"button\" data-company-trigger=\"" + escapeHtml(company.id) + "\" aria-expanded=\"false\" class=\"company-reference-trigger company-card-trigger\">" +
+                "<span class=\"company-card-meta\">" +
+                  "<img src=\"" + logoUrl + "\" alt=\"\" width=\"32\" height=\"32\" class=\"company-card-logo\" loading=\"lazy\">" +
+                  "<span class=\"company-card-name font-semibold text-ink\">" + escapeHtml(company.name) + "</span>" +
+                "</span>" +
+              "</button>" +
+            "</div>" +
           "</div>"
         );
       }).join("");
@@ -417,19 +416,16 @@
       });
     }
 
-    function closeCompanyReferences(exceptId) {
-      document.querySelectorAll("[data-company-item]").forEach(function (item) {
-        var itemId = item.getAttribute("data-company-item");
-        if (exceptId && itemId === exceptId) {
-          return;
-        }
-
-        item.classList.remove("is-open");
-        var trigger = item.querySelector("[data-company-trigger]");
-        if (trigger) {
-          trigger.setAttribute("aria-expanded", "false");
-        }
+    function syncTooltipTriggers(activeKey) {
+      document.querySelectorAll("[data-company-trigger]").forEach(function (trigger) {
+        var triggerKey = trigger.getAttribute("data-company-trigger");
+        trigger.setAttribute("aria-expanded", activeKey && triggerKey === activeKey ? "true" : "false");
       });
+
+      var rightsTrigger = $("rights-reference-trigger");
+      if (rightsTrigger) {
+        rightsTrigger.setAttribute("aria-expanded", activeKey === "rights" ? "true" : "false");
+      }
     }
 
     function getCompanyById(companyId) {
@@ -438,15 +434,15 @@
       }) || null;
     }
 
-    function updateTooltipContent(companyId) {
+    function buildCompanyTooltipHtml(companyId) {
       var company = getCompanyById(companyId);
       var copy = text();
 
-      if (!company || !tooltipContent) {
-        return;
+      if (!company) {
+        return "";
       }
 
-      tooltipContent.innerHTML =
+      return (
         "<p class=\"leading-6 text-muted\">" +
           "<span class=\"company-reference-kicker\">" + escapeHtml(copy.companyDescriptionLabel) + "</span><br>" +
           escapeHtml(company.description) +
@@ -458,7 +454,17 @@
         "<p class=\"mt-3 leading-6 text-muted\">" +
           "<span class=\"company-reference-kicker\">" + escapeHtml(copy.companyDataLabel) + "</span><br>" +
           escapeHtml(company.dataTypes.join(", ")) +
-        "</p>";
+        "</p>"
+      );
+    }
+
+    function buildRightsTooltipHtml() {
+      var copy = text();
+
+      return (
+        "<p class=\"company-reference-kicker\">" + escapeHtml(copy.rightsPlainTitle) + "</p>" +
+        "<p class=\"mt-2 leading-6 text-muted\">" + escapeHtml(copy.rightsPlainCopy) + "</p>"
+      );
     }
 
     function setTooltipPosition(x, y) {
@@ -489,23 +495,20 @@
       tooltip.style.top = top + "px";
     }
 
-    function showTooltip(companyId, x, y, pinned) {
+    function showTooltip(key, html, x, y, pinned) {
       if (!tooltip) {
         return;
       }
 
-      state.activeTooltipId = companyId;
-      state.pinnedTooltipId = pinned ? companyId : null;
-      updateTooltipContent(companyId);
-      closeCompanyReferences(companyId);
+      state.activeTooltipId = key;
+      state.pinnedTooltipId = pinned ? key : null;
+      if (tooltipContent) {
+        tooltipContent.innerHTML = html;
+      }
+      syncTooltipTriggers(key);
       tooltip.classList.add("is-visible");
       tooltip.setAttribute("aria-hidden", "false");
       setTooltipPosition(x, y);
-
-      var trigger = document.querySelector("[data-company-trigger=\"" + companyId + "\"]");
-      if (trigger) {
-        trigger.setAttribute("aria-expanded", "true");
-      }
     }
 
     function hideTooltip() {
@@ -517,7 +520,7 @@
       state.pinnedTooltipId = null;
       tooltip.classList.remove("is-visible");
       tooltip.setAttribute("aria-hidden", "true");
-      closeCompanyReferences();
+      syncTooltipTriggers(null);
     }
 
     function hasHoverPointer() {
@@ -712,30 +715,28 @@
 
       document.querySelectorAll("[data-company-trigger]").forEach(function (button) {
         var companyId = button.getAttribute("data-company-trigger");
-        var container = button.closest("[data-company-item]");
-
-        container.addEventListener("mouseenter", function (event) {
+        button.addEventListener("mouseenter", function (event) {
           if (!hasHoverPointer()) {
             return;
           }
 
-          showTooltip(companyId, event.clientX, event.clientY, false);
+          showTooltip(companyId, buildCompanyTooltipHtml(companyId), event.clientX, event.clientY, false);
         });
 
-        container.addEventListener("mousemove", function (event) {
+        button.addEventListener("mousemove", function (event) {
           if (!hasHoverPointer() || state.pinnedTooltipId) {
             return;
           }
 
           if (state.activeTooltipId !== companyId) {
-            showTooltip(companyId, event.clientX, event.clientY, false);
+            showTooltip(companyId, buildCompanyTooltipHtml(companyId), event.clientX, event.clientY, false);
             return;
           }
 
           setTooltipPosition(event.clientX, event.clientY);
         });
 
-        container.addEventListener("mouseleave", function () {
+        button.addEventListener("mouseleave", function () {
           if (!hasHoverPointer() || state.pinnedTooltipId === companyId) {
             return;
           }
@@ -745,7 +746,7 @@
 
         button.addEventListener("focus", function () {
           var rect = button.getBoundingClientRect();
-          showTooltip(companyId, rect.left + (rect.width / 2), rect.bottom, false);
+          showTooltip(companyId, buildCompanyTooltipHtml(companyId), rect.left + (rect.width / 2), rect.bottom, false);
         });
 
         button.addEventListener("blur", function () {
@@ -759,7 +760,7 @@
           event.preventDefault();
 
           if (hasHoverPointer()) {
-            showTooltip(companyId, rect.left + (rect.width / 2), rect.bottom, false);
+            showTooltip(companyId, buildCompanyTooltipHtml(companyId), rect.left + (rect.width / 2), rect.bottom, false);
             return;
           }
 
@@ -768,7 +769,7 @@
             return;
           }
 
-          showTooltip(companyId, rect.left + (rect.width / 2), rect.bottom, true);
+          showTooltip(companyId, buildCompanyTooltipHtml(companyId), rect.left + (rect.width / 2), rect.bottom, true);
         });
       });
     }
@@ -789,6 +790,71 @@
           }
           syncGenerateButton();
         });
+      });
+    }
+
+    function bindRightsTooltipTrigger() {
+      var trigger = $("rights-reference-trigger");
+
+      if (!trigger) {
+        return;
+      }
+
+      trigger.addEventListener("mouseenter", function (event) {
+        if (!hasHoverPointer()) {
+          return;
+        }
+
+        showTooltip("rights", buildRightsTooltipHtml(), event.clientX, event.clientY, false);
+      });
+
+      trigger.addEventListener("mousemove", function (event) {
+        if (!hasHoverPointer() || state.pinnedTooltipId) {
+          return;
+        }
+
+        if (state.activeTooltipId !== "rights") {
+          showTooltip("rights", buildRightsTooltipHtml(), event.clientX, event.clientY, false);
+          return;
+        }
+
+        setTooltipPosition(event.clientX, event.clientY);
+      });
+
+      trigger.addEventListener("mouseleave", function () {
+        if (!hasHoverPointer() || state.pinnedTooltipId === "rights") {
+          return;
+        }
+
+        hideTooltip();
+      });
+
+      trigger.addEventListener("focus", function () {
+        var rect = trigger.getBoundingClientRect();
+        showTooltip("rights", buildRightsTooltipHtml(), rect.left + (rect.width / 2), rect.bottom, false);
+      });
+
+      trigger.addEventListener("blur", function () {
+        if (!state.pinnedTooltipId) {
+          hideTooltip();
+        }
+      });
+
+      trigger.addEventListener("click", function (event) {
+        var rect = trigger.getBoundingClientRect();
+        event.preventDefault();
+
+        if (hasHoverPointer()) {
+          showTooltip("rights", buildRightsTooltipHtml(), rect.left + (rect.width / 2), rect.bottom, false);
+          return;
+        }
+
+        if (state.pinnedTooltipId === "rights") {
+          hideTooltip();
+          return;
+        }
+
+        showTooltip("rights", buildRightsTooltipHtml(), rect.left + (rect.width / 2), rect.bottom, true);
       });
     }
 
@@ -927,7 +993,6 @@
       $("who-copy").textContent = copy.who;
       $("legal-disclaimer-top").textContent = copy.legalDisclaimer;
       $("plain-rights-title").textContent = copy.rightsPlainTitle;
-      $("plain-rights-copy").textContent = copy.rightsPlainCopy;
       $("companies-heading").textContent = copy.selectCompanies;
       $("select-all-companies").textContent = copy.selectAll + " (" + companies.length + ")";
       $("rights-heading").textContent = copy.yourRights;
@@ -1100,6 +1165,7 @@
         updateStepNav();
       });
     });
+    bindRightsTooltipTrigger();
 
     $("start-countdown").addEventListener("click", function () {
       markAsSent(state.selectedCompanyIds.slice(), state.selectedRights.slice());
@@ -1146,7 +1212,9 @@
     $("start-over").addEventListener("click", resetState);
     $("start-over-overdue").addEventListener("click", resetState);
     document.addEventListener("click", function (event) {
-      if (!event.target.closest("[data-company-item]") && !event.target.closest("#company-reference-tooltip")) {
+      if (!event.target.closest("[data-company-item]") &&
+          !event.target.closest("#company-reference-tooltip") &&
+          !event.target.closest("#rights-reference-trigger")) {
         hideTooltip();
       }
     });
