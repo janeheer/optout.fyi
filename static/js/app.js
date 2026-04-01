@@ -310,7 +310,6 @@
         return company.category === category;
       }).map(function (company) {
         var logoUrl = "https://www.google.com/s2/favicons?domain=" + encodeURIComponent(company.domain || "") + "&sz=32";
-        var referenceId = "company-reference-" + company.id;
         return (
           "<div class=\"company-reference-item rounded-2xl border border-line bg-page/30 px-4 py-3\" data-company-item=\"" + escapeHtml(company.id) + "\">" +
             "<div class=\"flex items-center gap-3\">" +
@@ -319,23 +318,9 @@
                 "<img src=\"" + logoUrl + "\" alt=\"\" width=\"24\" height=\"24\" class=\"shrink-0 rounded\" loading=\"lazy\">" +
                 "<span class=\"truncate text-sm font-medium text-ink\">" + escapeHtml(company.name) + "</span>" +
               "</label>" +
-              "<button type=\"button\" data-company-trigger=\"" + escapeHtml(company.id) + "\" aria-expanded=\"false\" aria-controls=\"" + escapeHtml(referenceId) + "\" class=\"company-reference-trigger shrink-0 rounded-full border border-line bg-white/5 px-2 py-1 text-[0.7rem] font-semibold text-ink/85\">" +
+              "<button type=\"button\" data-company-trigger=\"" + escapeHtml(company.id) + "\" aria-expanded=\"false\" class=\"company-reference-trigger shrink-0 rounded-full border border-line bg-white/5 px-2 py-1 text-[0.7rem] font-semibold text-ink/85\">" +
                 "<span class=\"company-reference-mark\">" + escapeHtml(translations[lang].companyReferences) + "</span>" +
               "</button>" +
-            "</div>" +
-            "<div id=\"" + escapeHtml(referenceId) + "\" class=\"company-reference-popover mt-3 rounded-xl border border-ice/20 bg-panel/95 px-4 py-3 text-sm leading-6 text-muted shadow-lg shadow-page/30\">" +
-              "<p class=\"leading-6 text-muted\">" +
-                "<span class=\"company-reference-kicker\">" + escapeHtml(translations[lang].companyDescriptionLabel) + "</span><br>" +
-                escapeHtml(company.description) +
-              "</p>" +
-              "<p class=\"mt-3 leading-6 text-muted\">" +
-                "<span class=\"company-reference-kicker\">" + escapeHtml(translations[lang].companyContractsLabel) + "</span><br>" +
-                escapeHtml(company.knownContracts.join(", ")) +
-              "</p>" +
-              "<p class=\"mt-3 leading-6 text-muted\">" +
-                "<span class=\"company-reference-kicker\">" + escapeHtml(translations[lang].companyDataLabel) + "</span><br>" +
-                escapeHtml(company.dataTypes.join(", ")) +
-              "</p>" +
             "</div>" +
           "</div>"
         );
@@ -371,6 +356,8 @@
 
   function renderIndexPage() {
     var root = $("index-experience");
+    var tooltip = $("company-reference-tooltip");
+    var tooltipContent = $("company-reference-tooltip-content");
 
     if (!root) {
       return;
@@ -384,7 +371,9 @@
       generatedLetter: "",
       complaintLetter: "",
       sentRecord: getSentRecord(),
-      overdueCompanyIds: []
+      overdueCompanyIds: [],
+      activeTooltipId: null,
+      pinnedTooltipId: null
     };
 
     function clearDockTimer() {
@@ -434,6 +423,98 @@
           trigger.setAttribute("aria-expanded", "false");
         }
       });
+    }
+
+    function getCompanyById(companyId) {
+      return companies.find(function (company) {
+        return company.id === companyId;
+      }) || null;
+    }
+
+    function updateTooltipContent(companyId) {
+      var company = getCompanyById(companyId);
+      var copy = text();
+
+      if (!company || !tooltipContent) {
+        return;
+      }
+
+      tooltipContent.innerHTML =
+        "<p class=\"leading-6 text-muted\">" +
+          "<span class=\"company-reference-kicker\">" + escapeHtml(copy.companyDescriptionLabel) + "</span><br>" +
+          escapeHtml(company.description) +
+        "</p>" +
+        "<p class=\"mt-3 leading-6 text-muted\">" +
+          "<span class=\"company-reference-kicker\">" + escapeHtml(copy.companyContractsLabel) + "</span><br>" +
+          escapeHtml(company.knownContracts.join(", ")) +
+        "</p>" +
+        "<p class=\"mt-3 leading-6 text-muted\">" +
+          "<span class=\"company-reference-kicker\">" + escapeHtml(copy.companyDataLabel) + "</span><br>" +
+          escapeHtml(company.dataTypes.join(", ")) +
+        "</p>";
+    }
+
+    function setTooltipPosition(x, y) {
+      if (!tooltip) {
+        return;
+      }
+
+      tooltip.style.left = "0px";
+      tooltip.style.top = "0px";
+
+      var rect = tooltip.getBoundingClientRect();
+      var gutter = 12;
+      var left = x + 18;
+      var top = y + 18;
+
+      if (left + rect.width > window.innerWidth - gutter) {
+        left = x - rect.width - 18;
+      }
+
+      if (top + rect.height > window.innerHeight - gutter) {
+        top = y - rect.height - 18;
+      }
+
+      left = Math.max(gutter, Math.min(left, window.innerWidth - rect.width - gutter));
+      top = Math.max(gutter, Math.min(top, window.innerHeight - rect.height - gutter));
+
+      tooltip.style.left = left + "px";
+      tooltip.style.top = top + "px";
+    }
+
+    function showTooltip(companyId, x, y, pinned) {
+      if (!tooltip) {
+        return;
+      }
+
+      state.activeTooltipId = companyId;
+      state.pinnedTooltipId = pinned ? companyId : null;
+      updateTooltipContent(companyId);
+      closeCompanyReferences(companyId);
+      tooltip.classList.add("is-visible");
+      tooltip.setAttribute("aria-hidden", "false");
+      setTooltipPosition(x, y);
+
+      var trigger = document.querySelector("[data-company-trigger=\"" + companyId + "\"]");
+      if (trigger) {
+        trigger.setAttribute("aria-expanded", "true");
+      }
+    }
+
+    function hideTooltip() {
+      if (!tooltip) {
+        return;
+      }
+
+      state.activeTooltipId = null;
+      state.pinnedTooltipId = null;
+      tooltip.classList.remove("is-visible");
+      tooltip.setAttribute("aria-hidden", "true");
+      closeCompanyReferences();
+    }
+
+    function hasHoverPointer() {
+      return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     }
 
     function startDockSequence() {
@@ -492,12 +573,63 @@
 
       document.querySelectorAll("[data-company-trigger]").forEach(function (button) {
         var companyId = button.getAttribute("data-company-trigger");
+        var container = button.closest("[data-company-item]");
+
+        container.addEventListener("mouseenter", function (event) {
+          if (!hasHoverPointer()) {
+            return;
+          }
+
+          showTooltip(companyId, event.clientX, event.clientY, false);
+        });
+
+        container.addEventListener("mousemove", function (event) {
+          if (!hasHoverPointer() || state.pinnedTooltipId) {
+            return;
+          }
+
+          if (state.activeTooltipId !== companyId) {
+            showTooltip(companyId, event.clientX, event.clientY, false);
+            return;
+          }
+
+          setTooltipPosition(event.clientX, event.clientY);
+        });
+
+        container.addEventListener("mouseleave", function () {
+          if (!hasHoverPointer() || state.pinnedTooltipId === companyId) {
+            return;
+          }
+
+          hideTooltip();
+        });
+
+        button.addEventListener("focus", function () {
+          var rect = button.getBoundingClientRect();
+          showTooltip(companyId, rect.left + (rect.width / 2), rect.bottom, false);
+        });
+
+        button.addEventListener("blur", function () {
+          if (!state.pinnedTooltipId) {
+            hideTooltip();
+          }
+        });
+
         button.addEventListener("click", function (event) {
-          var container = event.currentTarget.closest("[data-company-item]");
-          var isOpen = container.classList.contains("is-open");
-          closeCompanyReferences(isOpen ? null : companyId);
-          container.classList.toggle("is-open", !isOpen);
-          button.setAttribute("aria-expanded", isOpen ? "false" : "true");
+          var rect = button.getBoundingClientRect();
+          event.preventDefault();
+
+          if (hasHoverPointer()) {
+            showTooltip(companyId, rect.left + (rect.width / 2), rect.bottom, false);
+            return;
+          }
+
+          if (state.pinnedTooltipId === companyId) {
+            hideTooltip();
+            return;
+          }
+
+          showTooltip(companyId, rect.left + (rect.width / 2), rect.bottom, true);
         });
       });
     }
@@ -534,6 +666,7 @@
       }
 
       clearDockTimer();
+      hideTooltip();
       setVisible("explanation-panel", false);
       setVisible("generator", false);
       setVisible("letter-output", false);
@@ -731,6 +864,7 @@
 
     function resetState() {
       clearDockTimer();
+      hideTooltip();
       clearSentRecord();
       state.sentRecord = null;
       state.generatedLetter = "";
@@ -772,6 +906,7 @@
 
       if (options.skipDockAnimation) {
         setFlowState("docked");
+        hideTooltip();
         return;
       }
 
@@ -784,6 +919,7 @@
       }
 
       setFlowState("docked");
+      hideTooltip();
     }
 
     $("lang-en").addEventListener("click", function () { setLang("en"); });
@@ -854,15 +990,23 @@
     $("start-over").addEventListener("click", resetState);
     $("start-over-overdue").addEventListener("click", resetState);
     document.addEventListener("click", function (event) {
-      if (!event.target.closest("[data-company-item]")) {
-        closeCompanyReferences();
+      if (!event.target.closest("[data-company-item]") && !event.target.closest("#company-reference-tooltip")) {
+        hideTooltip();
       }
     });
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape") {
-        closeCompanyReferences();
+        hideTooltip();
       }
     });
+    window.addEventListener("resize", function () {
+      hideTooltip();
+    });
+    window.addEventListener("scroll", function () {
+      if (state.pinnedTooltipId) {
+        hideTooltip();
+      }
+    }, true);
 
     // Restore saved language — only auto-advance if there's an active countdown
     var savedLang = null;

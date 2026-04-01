@@ -13,10 +13,8 @@
     position: fixed;
     inset: 4.5rem 0 0;
     pointer-events: none;
-    background:
-      radial-gradient(circle at top left, rgba(74, 138, 184, 0.18), transparent 32rem),
-      radial-gradient(circle at 85% 20%, rgba(185, 28, 28, 0.14), transparent 28rem);
-    opacity: 0.8;
+    background: linear-gradient(180deg, rgba(74, 138, 184, 0.05), transparent 18rem);
+    opacity: 0.55;
   }
 
   #red-card-shell {
@@ -28,12 +26,11 @@
     min-height: 26rem;
     overflow: hidden;
     border-radius: 1.6rem;
-    background:
-      linear-gradient(155deg, rgba(255, 255, 255, 0.14), transparent 38%),
-      linear-gradient(180deg, #cb2121 0%, #b91c1c 60%, #941515 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: #b91c1c;
     box-shadow:
-      0 30px 80px rgba(10, 15, 26, 0.48),
-      0 10px 30px rgba(127, 29, 29, 0.34);
+      0 24px 54px rgba(10, 15, 26, 0.34),
+      0 8px 20px rgba(127, 29, 29, 0.22);
     transform: translate(-50%, -50%);
     transition:
       top 0.85s var(--flow-ease),
@@ -44,18 +41,6 @@
       border-radius 0.85s var(--flow-ease),
       transform 0.85s var(--flow-ease),
       box-shadow 0.85s var(--flow-ease);
-  }
-
-  #red-card-shell::after {
-    content: "";
-    position: absolute;
-    inset: auto -3rem -3rem auto;
-    width: 13rem;
-    height: 13rem;
-    border-radius: 9999px;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.22), transparent 68%);
-    opacity: 0.6;
-    pointer-events: none;
   }
 
   .red-card-face {
@@ -148,8 +133,8 @@
     border-radius: 1.25rem;
     transform: none;
     box-shadow:
-      0 20px 50px rgba(10, 15, 26, 0.34),
-      0 8px 22px rgba(127, 29, 29, 0.24);
+      0 16px 36px rgba(10, 15, 26, 0.26),
+      0 6px 16px rgba(127, 29, 29, 0.18);
   }
 
   #index-experience[data-flow-state="countdown"] #red-card-shell {
@@ -179,19 +164,36 @@
     text-transform: uppercase;
   }
 
+  .company-reference-tooltip {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 70;
+    width: min(22rem, calc(100vw - 1.5rem));
+    border: 1px solid rgba(74, 138, 184, 0.28);
+    border-radius: 1rem;
+    background: rgba(22, 32, 50, 0.98);
+    box-shadow: 0 18px 40px rgba(5, 9, 17, 0.36);
+    opacity: 0;
+    transform: translateY(0.35rem);
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+  }
+
+  .company-reference-tooltip.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .company-reference-tooltip-card {
+    padding: 0.95rem 1rem;
+  }
+
   .company-reference-popover {
     opacity: 0;
     transform: translateY(-0.35rem);
     pointer-events: none;
     transition: opacity 0.22s ease, transform 0.22s ease;
-  }
-
-  .company-reference-item.is-open .company-reference-popover,
-  .company-reference-item:hover .company-reference-popover,
-  .company-reference-item:focus-within .company-reference-popover {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
   }
 
   .company-reference-kicker {
@@ -203,10 +205,8 @@
   }
 
   @media (hover: none) {
-    .company-reference-item:hover .company-reference-popover {
-      opacity: 0;
-      transform: translateY(-0.35rem);
-      pointer-events: none;
+    .company-reference-tooltip {
+      width: min(20rem, calc(100vw - 1.25rem));
     }
   }
 
@@ -319,6 +319,10 @@
     </div>
   </section>
 
+  <div id="company-reference-tooltip" class="company-reference-tooltip" role="tooltip" aria-hidden="true">
+    <div id="company-reference-tooltip-content" class="company-reference-tooltip-card"></div>
+  </div>
+
   <div id="app-shell" class="space-y-10">
     <section id="explanation-panel" class="space-y-10">
       <div class="space-y-6">
@@ -359,7 +363,7 @@
         <a href="#step-info">Your info</a>
         <a href="#step-generate">Generate</a>
       </nav>
-      <div id="step-companies" class="space-y-5">
+      <div id="step-companies" class="scroll-mt-32 space-y-5 lg:scroll-mt-10">
         <div class="flex items-center justify-between gap-4">
           <h2 id="companies-heading" class="text-xl font-semibold text-ink"></h2>
           <button id="select-all-companies" type="button" class="rounded border border-line px-3 py-2 text-sm text-ink transition hover:border-ice hover:text-ice"></button>
@@ -367,13 +371,13 @@
         <div id="company-groups" class="space-y-8"></div>
       </div>
 
-      <div class="space-y-4 border-t border-line pt-10">
+      <div id="step-rights" class="scroll-mt-32 space-y-4 border-t border-line pt-10 lg:scroll-mt-10">
         <h2 id="rights-heading" class="text-xl font-semibold text-ink"></h2>
         <p id="rights-note" class="text-sm leading-7 text-muted"></p>
         <div id="rights-list" class="space-y-3"></div>
       </div>
 
-      <div class="space-y-4 border-t border-line pt-10">
+      <div id="step-info" class="scroll-mt-32 space-y-4 border-t border-line pt-10 lg:scroll-mt-10">
         <h2 id="info-heading" class="text-xl font-semibold text-ink"></h2>
         <p id="info-note" class="text-sm leading-7 text-muted"></p>
         <div class="grid gap-4 sm:grid-cols-2">
@@ -388,7 +392,7 @@
         </div>
       </div>
 
-      <div class="border-t border-line pt-10">
+      <div id="step-generate" class="scroll-mt-32 border-t border-line pt-10 lg:scroll-mt-10">
         <button id="generate-letter" type="button" class="red-card w-full px-6 py-4 text-base font-bold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"></button>
       </div>
 
