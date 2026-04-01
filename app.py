@@ -16,7 +16,11 @@ app = Flask(__name__)
 @app.route("/")
 def index():
     """Main letter generator page."""
-    return render_template("index.html", page_title="OptOut - Immigrant Data Rights")
+    return render_template(
+        "index.html",
+        page_title="OptOut - Immigrant Data Rights",
+        page_shell_class="max-w-6xl",
+    )
 
 
 @app.route("/guide")
