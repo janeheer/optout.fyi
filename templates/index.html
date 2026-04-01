@@ -385,6 +385,87 @@
     }
   }
 
+  @media (max-width: 767px) {
+    #index-experience {
+      min-height: auto;
+    }
+
+    #red-card-shell {
+      position: relative;
+      top: auto;
+      left: auto;
+      z-index: 20;
+      width: 100%;
+      min-height: auto;
+      margin: 0 auto 1.5rem;
+      transform: none;
+      border-radius: 1.25rem;
+      box-shadow:
+        0 18px 38px rgba(10, 15, 26, 0.28),
+        0 8px 18px rgba(127, 29, 29, 0.16);
+    }
+
+    .red-card-face {
+      position: relative;
+      inset: auto;
+      display: none;
+      transform: none;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .red-card-face-inner {
+      gap: 1.25rem;
+      padding: 1.25rem;
+      justify-content: flex-start;
+    }
+
+    #index-experience[data-card-face="intro"] #red-card-intro,
+    #index-experience[data-card-face="compact"] #red-card-compact,
+    #index-experience[data-card-face="countdown"] #red-card-countdown {
+      display: flex;
+    }
+
+    #index-experience[data-flow-state="docked"] #app-shell,
+    #index-experience[data-flow-state="overdue"] #app-shell,
+    #index-experience[data-flow-state="countdown"] #app-shell {
+      padding-top: 0;
+    }
+
+    #index-experience[data-flow-state="docked"] #red-card-shell,
+    #index-experience[data-flow-state="overdue"] #red-card-shell,
+    #index-experience[data-flow-state="countdown"] #red-card-shell {
+      top: auto;
+      left: auto;
+      width: 100%;
+      min-height: auto;
+      transform: none;
+      border-radius: 1.25rem;
+    }
+
+    .card-lang-button {
+      width: 100%;
+    }
+
+    .compact-card-layout {
+      gap: 1rem;
+    }
+
+    .compact-card-controls {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .rights-tooltip-trigger {
+      justify-content: center;
+      width: 100%;
+    }
+
+    .company-card {
+      padding: 0.95rem;
+    }
+  }
+
   @media (min-width: 768px) {
     .company-group-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -400,22 +481,22 @@
   @media (max-width: 639px) {
     #index-experience[data-flow-state="docked"] #app-shell,
     #index-experience[data-flow-state="overdue"] #app-shell {
-      padding-top: 12.75rem;
+      padding-top: 0;
     }
 
     #index-experience[data-flow-state="docked"] #red-card-shell,
     #index-experience[data-flow-state="overdue"] #red-card-shell {
-      top: 4.75rem;
-      min-height: 9.75rem;
+      top: auto;
+      min-height: auto;
     }
 
     .compact-card-layout {
       gap: 0.9rem;
-      justify-content: center;
+      justify-content: flex-start;
     }
 
     .compact-card-controls {
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
     }
 
     #generator-nav {
@@ -429,7 +510,7 @@
     }
 
     #generator-nav .section-nav-step {
-      min-width: max-content;
+      min-width: 11rem;
       scroll-snap-align: start;
     }
   }
@@ -487,17 +568,17 @@
           <div class="space-y-5">
             <p id="red-card-kicker" class="text-xs font-bold uppercase tracking-[0.28em] text-white/70">Your digital data red card</p>
             <div class="space-y-3">
-              <h1 class="text-4xl font-black tracking-tight text-white sm:text-5xl">optout.fyi</h1>
-              <p id="red-card-tagline" class="mx-auto max-w-md text-lg font-semibold leading-8 text-white">
+              <h1 class="text-3xl font-black tracking-tight text-white sm:text-5xl">optout.fyi</h1>
+              <p id="red-card-tagline" class="mx-auto max-w-md text-base font-semibold leading-7 text-white sm:text-lg sm:leading-8">
                 Exercise your data privacy rights against AI surveillance companies.
               </p>
-              <p id="red-card-subtitle" class="mx-auto max-w-sm text-sm leading-7 text-white/78">
+              <p id="red-card-subtitle" class="mx-auto max-w-sm text-sm leading-6 text-white/78 sm:leading-7">
                 Select a language to generate a legally grounded CCPA/CPRA letter in your browser.
               </p>
             </div>
           </div>
           <div class="space-y-5">
-            <div class="mx-auto grid max-w-xs gap-3 sm:grid-cols-2 sm:max-w-sm">
+            <div class="mx-auto grid w-full max-w-xs gap-3 sm:max-w-sm sm:grid-cols-2">
               <button id="lang-en" type="button" class="card-lang-button rounded-xl border-2 border-white/30 bg-white/10 px-5 py-4 text-center font-semibold text-white hover:border-white hover:bg-white/20">
                 English
               </button>
@@ -505,9 +586,8 @@
                 Español
               </button>
             </div>
-            <p class="text-xs leading-6 text-white/65">
-              Nothing you type is sent to a server. Everything stays in your browser.<br>
-              Nada de lo que escribas se envia a un servidor. Todo permanece en tu navegador.
+            <p data-i18n="landing_local_only" class="text-xs leading-6 text-white/65 sm:text-sm">
+              Nothing you type is sent to a server. Everything stays in your browser.
             </p>
           </div>
         </div>
@@ -537,7 +617,7 @@
         <div class="red-card-face-inner text-center">
           <div>
             <p id="countdown-status" class="text-xs font-bold uppercase tracking-[0.3em] text-white/55"></p>
-            <p id="countdown-number" class="mt-6 text-7xl font-black tracking-tighter text-white sm:text-[9rem] sm:leading-none"></p>
+            <p id="countdown-number" class="mt-6 text-6xl font-black tracking-tighter text-white sm:text-[9rem] sm:leading-none"></p>
             <p id="countdown-copy" class="mt-4 text-base font-semibold uppercase tracking-[0.18em] text-white/82 sm:text-lg"></p>
           </div>
           <div class="space-y-5">
@@ -663,7 +743,7 @@
         </a>
       </nav>
       <div id="step-companies" class="scroll-mt-32 space-y-5 lg:scroll-mt-10">
-        <div class="flex items-center justify-between gap-4">
+        <div class="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 id="companies-heading" class="text-xl font-semibold text-ink"></h2>
           <button id="select-all-companies" type="button" class="rounded border border-line px-3 py-2 text-sm text-ink transition hover:border-ice hover:text-ice"></button>
         </div>
