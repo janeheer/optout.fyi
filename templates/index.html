@@ -1,40 +1,330 @@
 {% extends "base.html" %}
 
+{% block head %}
+<style>
+  #index-experience {
+    --flow-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    position: relative;
+    min-height: calc(100vh - 10rem);
+  }
+
+  #index-experience::before {
+    content: "";
+    position: fixed;
+    inset: 4.5rem 0 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at top left, rgba(74, 138, 184, 0.18), transparent 32rem),
+      radial-gradient(circle at 85% 20%, rgba(185, 28, 28, 0.14), transparent 28rem);
+    opacity: 0.8;
+  }
+
+  #red-card-shell {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: 30;
+    width: min(34rem, calc(100vw - 2rem));
+    min-height: 26rem;
+    overflow: hidden;
+    border-radius: 1.6rem;
+    background:
+      linear-gradient(155deg, rgba(255, 255, 255, 0.14), transparent 38%),
+      linear-gradient(180deg, #cb2121 0%, #b91c1c 60%, #941515 100%);
+    box-shadow:
+      0 30px 80px rgba(10, 15, 26, 0.48),
+      0 10px 30px rgba(127, 29, 29, 0.34);
+    transform: translate(-50%, -50%);
+    transition:
+      top 0.85s var(--flow-ease),
+      left 0.85s var(--flow-ease),
+      width 0.85s var(--flow-ease),
+      min-height 0.85s var(--flow-ease),
+      padding 0.85s var(--flow-ease),
+      border-radius 0.85s var(--flow-ease),
+      transform 0.85s var(--flow-ease),
+      box-shadow 0.85s var(--flow-ease);
+  }
+
+  #red-card-shell::after {
+    content: "";
+    position: absolute;
+    inset: auto -3rem -3rem auto;
+    width: 13rem;
+    height: 13rem;
+    border-radius: 9999px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.22), transparent 68%);
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  .red-card-face {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    opacity: 0;
+    transform: translateY(1rem);
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+
+  .red-card-face-inner {
+    display: flex;
+    min-height: 100%;
+    width: 100%;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 2rem;
+  }
+
+  #index-experience[data-card-face="intro"] #red-card-intro,
+  #index-experience[data-card-face="compact"] #red-card-compact,
+  #index-experience[data-card-face="countdown"] #red-card-countdown {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  .card-lang-button,
+  .compact-lang-button,
+  .company-reference-trigger {
+    transition:
+      border-color 0.2s ease,
+      background-color 0.2s ease,
+      color 0.2s ease,
+      opacity 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .card-lang-button:hover,
+  .compact-lang-button:hover,
+  .company-reference-trigger:hover {
+    transform: translateY(-1px);
+  }
+
+  .compact-lang-button[aria-pressed="true"] {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.48);
+    color: #ffffff;
+  }
+
+  #app-shell {
+    position: relative;
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate3d(0, 2.5rem, 0);
+    transition: opacity 0.7s var(--flow-ease), transform 0.7s var(--flow-ease);
+  }
+
+  #index-experience[data-flow-state="docked"] #app-shell,
+  #index-experience[data-flow-state="overdue"] #app-shell,
+  #index-experience[data-flow-state="countdown"] #app-shell {
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+  }
+
+  #index-experience[data-flow-state="docked"] #app-shell,
+  #index-experience[data-flow-state="overdue"] #app-shell {
+    padding-top: 14.75rem;
+  }
+
+  #index-experience[data-flow-state="countdown"] #app-shell {
+    padding-top: 37rem;
+  }
+
+  #app-shell > section {
+    max-width: 58rem;
+    margin-left: auto;
+  }
+
+  #index-experience[data-flow-state="docked"] #red-card-shell,
+  #index-experience[data-flow-state="overdue"] #red-card-shell {
+    top: 5.35rem;
+    left: 1rem;
+    width: calc(100vw - 2rem);
+    min-height: 10.75rem;
+    border-radius: 1.25rem;
+    transform: none;
+    box-shadow:
+      0 20px 50px rgba(10, 15, 26, 0.34),
+      0 8px 22px rgba(127, 29, 29, 0.24);
+  }
+
+  #index-experience[data-flow-state="countdown"] #red-card-shell {
+    top: 50%;
+    left: 50%;
+    width: min(44rem, calc(100vw - 2rem));
+    min-height: 28rem;
+    border-radius: 1.75rem;
+    transform: translate(-50%, -50%);
+  }
+
+  #index-experience[data-flow-state="docked"] .red-card-face-inner,
+  #index-experience[data-flow-state="overdue"] .red-card-face-inner {
+    padding: 1.1rem 1.15rem 1.2rem;
+  }
+
+  .company-reference-item {
+    position: relative;
+    overflow: visible;
+  }
+
+  .company-reference-mark {
+    border-bottom: 1px solid rgba(74, 138, 184, 0.45);
+    color: #9cc1d8;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .company-reference-popover {
+    opacity: 0;
+    transform: translateY(-0.35rem);
+    pointer-events: none;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+
+  .company-reference-item.is-open .company-reference-popover,
+  .company-reference-item:hover .company-reference-popover,
+  .company-reference-item:focus-within .company-reference-popover {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .company-reference-kicker {
+    color: #9cc1d8;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  @media (hover: none) {
+    .company-reference-item:hover .company-reference-popover {
+      opacity: 0;
+      transform: translateY(-0.35rem);
+      pointer-events: none;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    #app-shell {
+      transform: translate3d(2.75rem, 0, 0);
+    }
+
+    #index-experience[data-flow-state="docked"] #app-shell,
+    #index-experience[data-flow-state="overdue"] #app-shell {
+      padding-top: 1rem;
+      padding-left: 20rem;
+    }
+
+    #index-experience[data-flow-state="countdown"] #app-shell {
+      padding-top: 39rem;
+    }
+
+    #index-experience[data-flow-state="docked"] #red-card-shell,
+    #index-experience[data-flow-state="overdue"] #red-card-shell {
+      top: 6.35rem;
+      left: max(1rem, calc((100vw - 72rem) / 2 + 1rem));
+      width: 17.5rem;
+      min-height: 16.25rem;
+    }
+
+    #index-experience[data-flow-state="countdown"] #red-card-shell {
+      width: min(48rem, calc(100vw - 6rem));
+      min-height: 32rem;
+    }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div data-page="index" class="space-y-10">
-  <section id="language-picker" class="py-8 sm:py-16">
-    <!-- Red card hero -->
-    <div class="red-card mx-auto max-w-lg px-8 py-10 text-center shadow-lg shadow-red-900/30">
-      <p class="text-sm font-bold uppercase tracking-[0.25em] text-white/70">Your digital data red card / Tu tarjeta roja digital de datos</p>
-      <h1 class="mt-3 text-4xl font-black tracking-tight text-white sm:text-5xl">optout.fyi</h1>
-      <p class="mx-auto mt-4 max-w-sm text-base leading-7 text-white/80">
-        Exercise your data privacy rights against AI surveillance companies.<br>
-        <span class="text-white/60">Ejerce tus derechos de privacidad de datos contra empresas de vigilancia con IA.</span>
-      </p>
-      <div class="mx-auto mt-8 grid max-w-xs gap-3 sm:grid-cols-2 sm:max-w-sm">
-        <button id="lang-en" type="button" class="rounded-lg border-2 border-white/30 bg-white/10 px-5 py-4 text-center font-semibold text-white transition hover:border-white hover:bg-white/20">
-          English
-        </button>
-        <button id="lang-es" type="button" class="rounded-lg border-2 border-white/30 bg-white/10 px-5 py-4 text-center font-semibold text-white transition hover:border-white hover:bg-white/20">
-          Espa&ntilde;ol
-        </button>
+<div data-page="index" id="index-experience" data-flow-state="picker" data-card-face="intro" class="space-y-10">
+  <section id="language-picker" aria-label="Language selection">
+    <div id="red-card-shell" class="red-card">
+      <div id="red-card-intro" class="red-card-face">
+        <div class="red-card-face-inner text-center">
+          <div class="space-y-5">
+            <p class="text-xs font-bold uppercase tracking-[0.28em] text-white/70">Your digital data red card / Tu tarjeta roja digital</p>
+            <div class="space-y-3">
+              <h1 class="text-4xl font-black tracking-tight text-white sm:text-5xl">optout.fyi</h1>
+              <p id="red-card-tagline" class="mx-auto max-w-md text-lg font-semibold leading-8 text-white">
+                Exercise your data privacy rights against AI surveillance companies.
+              </p>
+              <p id="red-card-subtitle" class="mx-auto max-w-sm text-sm leading-7 text-white/78">
+                Select a language to generate a legally grounded CCPA/CPRA letter in your browser.
+              </p>
+            </div>
+          </div>
+          <div class="space-y-5">
+            <div class="mx-auto grid max-w-xs gap-3 sm:grid-cols-2 sm:max-w-sm">
+              <button id="lang-en" type="button" class="card-lang-button rounded-xl border-2 border-white/30 bg-white/10 px-5 py-4 text-center font-semibold text-white hover:border-white hover:bg-white/20">
+                English
+              </button>
+              <button id="lang-es" type="button" class="card-lang-button rounded-xl border-2 border-white/30 bg-white/10 px-5 py-4 text-center font-semibold text-white hover:border-white hover:bg-white/20">
+                Espanol
+              </button>
+            </div>
+            <p class="text-xs leading-6 text-white/65">
+              Nothing you type is sent to a server. Everything stays in your browser.<br>
+              Nada de lo que escribas se envia a un servidor. Todo permanece en tu navegador.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div id="red-card-compact" class="red-card-face">
+        <div class="red-card-face-inner">
+          <div class="space-y-4">
+            <p class="text-[0.72rem] font-bold uppercase tracking-[0.24em] text-white/70">Your digital data red card / Tu tarjeta roja digital</p>
+            <div class="space-y-1">
+              <h2 class="text-3xl font-black tracking-tight text-white">optout.fyi</h2>
+              <p class="text-sm leading-6 text-white/75">Your digital data red card / Tu tarjeta roja digital</p>
+            </div>
+          </div>
+          <div class="flex items-center justify-between gap-3">
+            <p class="text-xs uppercase tracking-[0.2em] text-white/55">Language</p>
+            <div class="inline-flex rounded-full border border-white/20 bg-white/10 p-1">
+              <button id="lang-toggle-en" type="button" data-lang-toggle="en" class="compact-lang-button rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-white/72" aria-pressed="false">
+                EN
+              </button>
+              <button id="lang-toggle-es" type="button" data-lang-toggle="es" class="compact-lang-button rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-white/72" aria-pressed="false">
+                ES
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="red-card-countdown" class="red-card-face">
+        <div class="red-card-face-inner text-center">
+          <div>
+            <p id="countdown-status" class="text-xs font-bold uppercase tracking-[0.3em] text-white/55"></p>
+            <p id="countdown-number" class="mt-6 text-7xl font-black tracking-tighter text-white sm:text-[9rem] sm:leading-none"></p>
+            <p id="countdown-copy" class="mt-4 text-base font-semibold uppercase tracking-[0.18em] text-white/82 sm:text-lg"></p>
+          </div>
+          <div class="space-y-5">
+            <div class="mx-auto h-3 w-full max-w-md overflow-hidden rounded-full bg-white/20">
+              <div id="countdown-bar" class="h-full rounded-full bg-white transition-all"></div>
+            </div>
+            <p id="countdown-dates" class="text-sm font-medium leading-7 text-white/68"></p>
+            <div class="mx-auto h-px max-w-xs bg-white/20"></div>
+            <p class="text-xs font-bold uppercase tracking-[0.22em] text-white/45">optout.fyi</p>
+          </div>
+        </div>
       </div>
     </div>
-    <p class="mt-6 text-center text-xs text-muted">
-      Nothing you type is sent to a server. Everything stays in your browser.<br>
-      Nada de lo que escribas se env&iacute;a a un servidor. Todo permanece en tu navegador.
-    </p>
   </section>
 
-  <div id="app-shell" class="hidden-panel space-y-10">
+  <div id="app-shell" class="space-y-10">
     <section id="explanation-panel" class="space-y-10">
       <div class="space-y-6">
-        <div class="flex items-center justify-between gap-4">
-          <div>
-            <p class="text-sm uppercase tracking-[0.2em] text-muted">Immigrant data rights</p>
-            <h1 id="hero-title" class="mt-2 text-3xl font-semibold tracking-tight text-ink"></h1>
-          </div>
-          <button id="lang-toggle" type="button" class="rounded border border-line px-3 py-2 text-sm text-ink transition hover:border-ice hover:text-ice"></button>
+        <div>
+          <p class="text-sm uppercase tracking-[0.2em] text-muted">Immigrant data rights</p>
+          <h1 id="hero-title" class="mt-2 text-3xl font-semibold tracking-tight text-ink"></h1>
         </div>
         <p id="hero-subtitle" class="max-w-2xl text-base leading-8 text-muted"></p>
       </div>
@@ -62,14 +352,14 @@
       <button id="get-started" type="button" class="red-card w-full px-6 py-4 text-base font-bold text-white transition hover:brightness-110"></button>
     </section>
 
-    <section id="generator" class="space-y-10 border-t border-line pt-10">
+    <section id="generator" class="hidden-panel space-y-10 border-t border-line pt-10">
       <nav class="section-nav" id="generator-nav">
         <a href="#step-companies">Companies</a>
         <a href="#step-rights">Rights</a>
         <a href="#step-info">Your info</a>
         <a href="#step-generate">Generate</a>
       </nav>
-      <div id="step-companies" class="space-y-4">
+      <div id="step-companies" class="space-y-5">
         <div class="flex items-center justify-between gap-4">
           <h2 id="companies-heading" class="text-xl font-semibold text-ink"></h2>
           <button id="select-all-companies" type="button" class="rounded border border-line px-3 py-2 text-sm text-ink transition hover:border-ice hover:text-ice"></button>
@@ -141,22 +431,8 @@
       </section>
     </section>
 
-    <section id="countdown-panel" class="hidden-panel">
-      <!-- The digital red card — the only thing you see -->
-      <div class="red-card px-8 py-12 text-center shadow-lg shadow-red-900/30 sm:py-16">
-        <p id="countdown-status" class="text-xs font-bold uppercase tracking-[0.3em] text-white/50"></p>
-        <p id="countdown-number" class="mt-6 text-8xl font-black tracking-tighter text-white sm:text-[10rem] sm:leading-none"></p>
-        <p id="countdown-copy" class="mt-3 text-lg font-semibold uppercase tracking-wide text-white/80"></p>
-        <div class="mx-auto mt-8 h-3 max-w-md overflow-hidden rounded-full bg-white/20">
-          <div id="countdown-bar" class="h-full rounded-full bg-white transition-all"></div>
-        </div>
-        <p id="countdown-dates" class="mt-5 text-sm font-medium text-white/60"></p>
-        <div class="mx-auto mt-6 h-px max-w-xs bg-white/20"></div>
-        <p class="mt-4 text-xs font-bold uppercase tracking-[0.2em] text-white/40">optout.fyi</p>
-      </div>
-
-      <!-- Companies tucked away in a collapsible -->
-      <details class="mt-8 group">
+    <section id="countdown-panel" class="hidden-panel space-y-8">
+      <details class="group rounded border border-line p-4">
         <summary class="cursor-pointer text-sm text-muted transition hover:text-ink">
           <span id="companies-notified"></span>
         </summary>
@@ -166,8 +442,8 @@
         </div>
       </details>
 
-      <p id="countdown-note" class="mt-6 text-xs leading-6 text-muted/50"></p>
-      <button id="start-over" type="button" class="mt-4 text-sm text-muted transition hover:text-ink"></button>
+      <p id="countdown-note" class="text-xs leading-6 text-muted/60"></p>
+      <button id="start-over" type="button" class="text-sm text-muted transition hover:text-ink"></button>
     </section>
 
     <section id="overdue-panel" class="hidden-panel space-y-8">
