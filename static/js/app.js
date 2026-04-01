@@ -678,6 +678,7 @@
       state.lang = lang;
       try { localStorage.setItem("optout_lang", lang); } catch (_e) {}
       renderTexts();
+      translatePage(lang);
     }
 
     $("lang-en").addEventListener("click", function () { setLang("en"); });
@@ -903,9 +904,108 @@
     refreshComplaintButton();
   }
 
+  // ==============================
+  // Page-wide i18n for guide + resources
+  // ==============================
+  var pageStrings = {
+    // Guide page
+    guide_label: { en: "Legal guide", es: "Gu\u00eda legal" },
+    guide_title: { en: "Know your rights and track deadlines", es: "Conoce tus derechos y rastrea los plazos" },
+    guide_intro: { en: "This page explains the legal timeline behind OptOut, helps you calculate a response deadline, and lets you draft a complaint if a company fails to respond.", es: "Esta p\u00e1gina explica los plazos legales, te ayuda a calcular la fecha l\u00edmite de respuesta y te permite redactar una queja si una empresa no responde." },
+    guide_disclaimer: { en: "This tool generates template letters based on published California statutes. It is not legal advice, does not create an attorney-client relationship, and does not send any personal information to the server.", es: "Esta herramienta genera cartas basadas en leyes de California. No es asesor\u00eda legal, no crea una relaci\u00f3n abogado-cliente y no env\u00eda informaci\u00f3n personal al servidor." },
+    guide_nav_rights: { en: "Know your rights", es: "Tus derechos" },
+    guide_nav_sending: { en: "How to send", es: "C\u00f3mo enviar" },
+    guide_nav_tracker: { en: "Deadline tracker", es: "Rastreador de plazos" },
+    guide_nav_complaint: { en: "Complaint generator", es: "Generador de quejas" },
+    guide_nav_filing: { en: "How to file", es: "C\u00f3mo presentar" },
+    guide_nav_support: { en: "Support orgs", es: "Organizaciones" },
+    guide_rights_title: { en: "Know your rights", es: "Conoce tus derechos" },
+    guide_rights_p1: { en: "The California Consumer Privacy Act (CCPA), as amended by the California Privacy Rights Act (CPRA), grants privacy rights to California residents. However, many companies process privacy requests broadly rather than risk non-compliance, and many states now have similar privacy laws. Sending a CCPA-style request creates a paper trail and puts a company on notice even if you are not a California resident.", es: "La Ley de Privacidad del Consumidor de California (CCPA), enmendada por la CPRA, otorga derechos de privacidad a residentes de California. Sin embargo, muchas empresas procesan todas las solicitudes para evitar incumplimiento. Enviar una solicitud estilo CCPA crea un registro y pone a la empresa sobre aviso." },
+    guide_rights_p2: { en: "Most AI surveillance companies meet the CCPA thresholds: over $25 million in annual revenue, or buying, selling, or sharing data on 100,000 or more consumers. When they receive a valid request, they are required to respond within the applicable deadline.", es: "La mayor\u00eda de las empresas de vigilancia con IA cumplen los umbrales de la CCPA: m\u00e1s de $25 millones en ingresos anuales, o comprar, vender o compartir datos de 100,000 o m\u00e1s consumidores." },
+    guide_deadlines_title: { en: "Key deadlines", es: "Plazos clave" },
+    guide_deadline_45: { en: "45 calendar days: Right to Know, Delete, Correct, and Opt Out of Profiling.", es: "45 d\u00edas calendario: Derecho a Saber, Eliminar, Corregir y Excluir del Perfilado." },
+    guide_deadline_15: { en: "15 business days: Opt Out of Sale/Sharing and Limit Sensitive Personal Information.", es: "15 d\u00edas h\u00e1biles: Excluir de Venta/Compartici\u00f3n y Limitar Informaci\u00f3n Sensible." },
+    guide_deadline_ext: { en: "Companies may request one 45-day extension, but they must notify you within the initial response period.", es: "Las empresas pueden solicitar una extensi\u00f3n de 45 d\u00edas, pero deben notificarte dentro del per\u00edodo inicial." },
+    guide_penalty: { en: "If a company fails to respond within the deadline, you can file a complaint with the California Privacy Protection Agency (CPPA) and/or the California Attorney General. Civil penalties can reach up to $2,500 per violation, or $7,500 per intentional violation.", es: "Si una empresa no responde dentro del plazo, puedes presentar una queja ante la CPPA y/o el Fiscal General de California. Las multas pueden llegar a $2,500 por violaci\u00f3n, o $7,500 por violaci\u00f3n intencional." },
+    guide_send_title: { en: "How to send your letter", es: "C\u00f3mo enviar tu carta" },
+    guide_send_email: { en: "Option 1: Email", es: "Opci\u00f3n 1: Email" },
+    guide_send_email_p: { en: "Use the company's privacy email address and keep a copy in your sent folder as proof.", es: "Usa el correo de privacidad de la empresa y guarda una copia como prueba." },
+    guide_send_portal: { en: "Option 2: Privacy portal", es: "Opci\u00f3n 2: Portal de privacidad" },
+    guide_send_portal_p: { en: "Some companies require submission through an online portal. Paste the letter into the form and save screenshots.", es: "Algunas empresas requieren env\u00edo por portal. Pega la carta en el formulario y guarda capturas." },
+    guide_send_mail: { en: "Option 3: Certified mail", es: "Opci\u00f3n 3: Correo certificado" },
+    guide_send_mail_p: { en: "Certified mail creates the clearest proof of delivery and gives you a physical record of timing.", es: "El correo certificado crea la prueba m\u00e1s clara de entrega." },
+    guide_tracker_title: { en: "Deadline tracker", es: "Rastreador de plazos" },
+    guide_tracker_desc: { en: "Enter the date you sent your letter and select the rights you requested. The calculation uses the same business-day and calendar-day rules as the main tool.", es: "Ingresa la fecha en que enviaste tu carta y selecciona los derechos solicitados." },
+    guide_tracker_date: { en: "Date you sent the letter", es: "Fecha de env\u00edo de la carta" },
+    guide_tracker_rights: { en: "Rights you requested", es: "Derechos solicitados" },
+    guide_complaint_title: { en: "Complaint generator", es: "Generador de quejas" },
+    guide_complaint_desc: { en: "If a company missed the deadline, generate a formal complaint letter to the CPPA and the California Attorney General.", es: "Si una empresa no cumpli\u00f3 el plazo, genera una carta de queja formal para la CPPA y el Fiscal General." },
+    guide_complaint_company: { en: "Company", es: "Empresa" },
+    guide_complaint_select: { en: "Select a company...", es: "Selecciona una empresa..." },
+    guide_complaint_date: { en: "Date you sent the original letter", es: "Fecha de env\u00edo de la carta original" },
+    guide_complaint_rights: { en: "Rights you requested", es: "Derechos solicitados" },
+    guide_complaint_name: { en: "Your name", es: "Tu nombre" },
+    guide_complaint_email: { en: "Your email", es: "Tu correo" },
+    guide_complaint_btn: { en: "Generate complaint letter", es: "Generar carta de queja" },
+    guide_complaint_copy: { en: "Copy", es: "Copiar" },
+    guide_complaint_download: { en: "Download", es: "Descargar" },
+    guide_file_title: { en: "How to file a complaint", es: "C\u00f3mo presentar una queja" },
+    guide_file_step1: { en: "Step 1: File with the CPPA", es: "Paso 1: Presentar ante la CPPA" },
+    guide_file_step1_p: { en: "The CPPA has independent enforcement authority and can impose fines of $2,500 to $7,500 per violation.", es: "La CPPA tiene autoridad de ejecuci\u00f3n independiente y puede imponer multas de $2,500 a $7,500 por violaci\u00f3n." },
+    guide_file_step2: { en: "Step 2: File with the California Attorney General", es: "Paso 2: Presentar ante el Fiscal General" },
+    guide_file_step2_p: { en: "The Attorney General has concurrent enforcement authority and may use complaints in pattern-of-practice investigations.", es: "El Fiscal General tiene autoridad concurrente y puede usar las quejas en investigaciones." },
+    guide_file_step3: { en: "Step 3: Keep records", es: "Paso 3: Guardar registros" },
+    guide_file_step3_p: { en: "Save your original letter, proof of delivery, screenshots, complaint drafts, and any company responses. Keep dates organized.", es: "Guarda tu carta original, prueba de entrega, capturas, borradores de quejas y respuestas. Mant\u00e9n las fechas organizadas." },
+    guide_support_title: { en: "Support organizations", es: "Organizaciones de apoyo" },
+    guide_support_note: { en: "This page does not collect or store any personal information. Any complaint text you generate is created locally in your browser.", es: "Esta p\u00e1gina no recopila ni almacena informaci\u00f3n personal. Todo se genera localmente en tu navegador." },
+    // Resources page
+    res_label: { en: "Resources", es: "Recursos" },
+    res_title: { en: "Further reading and practical help", es: "Lectura adicional y ayuda pr\u00e1ctica" },
+    res_intro: { en: "optout.fyi covers one piece of a broader privacy strategy. These references can help you remove data from brokers, understand immigrant data rights, and improve your digital security.", es: "optout.fyi cubre una parte de una estrategia m\u00e1s amplia de privacidad. Estos recursos pueden ayudarte a eliminar datos de corredores, entender tus derechos y mejorar tu seguridad digital." },
+    res_disclaimer: { en: "This page contains only static links and explanations. No data collection, no accounts, and no user tracking.", es: "Esta p\u00e1gina solo contiene enlaces est\u00e1ticos. Sin recopilaci\u00f3n de datos, sin cuentas, sin rastreo." },
+    res_nav_brokers: { en: "Data broker opt-outs", es: "Exclusi\u00f3n de corredores" },
+    res_nav_advocacy: { en: "Advocacy", es: "Defensa" },
+    res_nav_security: { en: "Digital security", es: "Seguridad digital" },
+    res_nav_why: { en: "Why this matters", es: "Por qu\u00e9 importa" },
+    res_brokers_title: { en: "Data broker opt-outs", es: "Exclusi\u00f3n de corredores de datos" },
+    res_brokers_desc: { en: "Guides and registries for removing your personal information from data brokers that sell to law enforcement and immigration agencies.", es: "Gu\u00edas y registros para eliminar tu informaci\u00f3n personal de corredores de datos que venden a agencias de inmigraci\u00f3n." },
+    res_advocacy_title: { en: "Advocacy and immigrant data rights", es: "Defensa y derechos de datos de inmigrantes" },
+    res_advocacy_desc: { en: "Organizations documenting how commercial data is used in immigration enforcement and fighting surveillance practices.", es: "Organizaciones que documentan c\u00f3mo se usan datos comerciales en la aplicaci\u00f3n de leyes de inmigraci\u00f3n." },
+    res_security_title: { en: "Digital security links", es: "Enlaces de seguridad digital" },
+    res_security_desc: { en: "Practical guides for higher-risk communities, including immigrants, activists, and journalists.", es: "Gu\u00edas pr\u00e1cticas para comunidades de alto riesgo, incluidos inmigrantes, activistas y periodistas." },
+    res_why_title: { en: "Why this matters", es: "Por qu\u00e9 esto importa" },
+    res_why_p1: { en: "AI surveillance companies collect data from public records, social media, cell phone location pings, license plate readers, utility records, and many other sources. That data can be packaged into products used to locate, profile, and target immigrants.", es: "Las empresas de vigilancia con IA recopilan datos de registros p\u00fablicos, redes sociales, ubicaci\u00f3n de celulares, lectores de placas y muchas otras fuentes. Esos datos pueden usarse para localizar, perfilar y atacar a inmigrantes." },
+    res_why_p2: { en: "Exercising your privacy rights is one step. Opting out of data brokers, securing communications, and understanding your digital footprint are part of the same broader defense.", es: "Ejercer tus derechos de privacidad es un paso. Excluirte de corredores de datos, asegurar tus comunicaciones y entender tu huella digital son parte de la misma defensa." },
+    res_why_note: { en: "optout.fyi does not endorse or verify every third-party site listed here. Review those organizations and decide what is appropriate for your situation.", es: "optout.fyi no respalda ni verifica cada sitio listado aqu\u00ed. Revisa esas organizaciones y decide qu\u00e9 es apropiado para tu situaci\u00f3n." },
+    res_about_title: { en: "About this tool", es: "Acerca de esta herramienta" },
+    res_about_p: { en: "optout.fyi generates template letters based on published California statutes (CCPA/CPRA). It is not legal advice and does not create an attorney-client relationship.", es: "optout.fyi genera cartas basadas en leyes publicadas de California (CCPA/CPRA). No es asesor\u00eda legal." },
+    res_inspired: { en: "Inspired by the ILRC Red Cards \u2014 know your rights, assert your rights.", es: "Inspirado en las Tarjetas Rojas del ILRC \u2014 conoce tus derechos, ejerce tus derechos." },
+    // Footer
+    footer_zero: { en: "Zero data collected. Everything runs in your browser.", es: "Cero datos recopilados. Todo funciona en tu navegador." }
+  };
+
+  function translatePage(lang) {
+    document.querySelectorAll("[data-i18n]").forEach(function (el) {
+      var key = el.getAttribute("data-i18n");
+      if (pageStrings[key] && pageStrings[key][lang]) {
+        el.textContent = pageStrings[key][lang];
+      }
+    });
+    // Footer
+    var footerText = document.querySelector("[data-i18n-footer]");
+    if (footerText && pageStrings.footer_zero) {
+      footerText.textContent = pageStrings.footer_zero[lang];
+    }
+  }
+
   function initializePage() {
     renderIndexPage();
     renderGuidePage();
+    // Apply saved language to guide/resources/footer
+    var lang = "en";
+    try { lang = localStorage.getItem("optout_lang") || "en"; } catch (_e) {}
+    if (lang !== "en" && lang !== "es") lang = "en";
+    translatePage(lang);
   }
 
   document.addEventListener("DOMContentLoaded", initializePage);

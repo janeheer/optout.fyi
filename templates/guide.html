@@ -3,96 +3,72 @@
 {% block content %}
 <div data-page="guide" class="space-y-10">
   <section class="space-y-4">
-    <p class="text-sm uppercase tracking-[0.2em] text-muted">Legal guide</p>
-    <h1 class="text-3xl font-semibold tracking-tight text-ink">Know your rights and track deadlines</h1>
-    <p class="max-w-2xl text-base leading-8 text-muted">
-      This page explains the legal timeline behind OptOut, helps you calculate a response deadline,
-      and lets you draft a complaint if a company fails to respond.
-    </p>
-    <p class="max-w-2xl text-sm leading-7 text-muted">
-      This tool generates template letters based on published California statutes. It is not legal advice,
-      does not create an attorney-client relationship, and does not send any personal information to the server.
-    </p>
+    <p data-i18n="guide_label" class="text-sm uppercase tracking-[0.2em] text-muted">Legal guide</p>
+    <h1 data-i18n="guide_title" class="text-3xl font-semibold tracking-tight text-ink">Know your rights and track deadlines</h1>
+    <p data-i18n="guide_intro" class="max-w-2xl text-base leading-8 text-muted"></p>
+    <p data-i18n="guide_disclaimer" class="max-w-2xl text-sm leading-7 text-muted"></p>
   </section>
 
   <nav class="section-nav">
-    <a href="#rights">Know your rights</a>
-    <a href="#sending">How to send</a>
-    <a href="#tracker">Deadline tracker</a>
-    <a href="#complaint">Complaint generator</a>
-    <a href="#filing">How to file</a>
-    <a href="#support">Support orgs</a>
+    <a href="#rights" data-i18n="guide_nav_rights">Know your rights</a>
+    <a href="#sending" data-i18n="guide_nav_sending">How to send</a>
+    <a href="#tracker" data-i18n="guide_nav_tracker">Deadline tracker</a>
+    <a href="#complaint" data-i18n="guide_nav_complaint">Complaint generator</a>
+    <a href="#filing" data-i18n="guide_nav_filing">How to file</a>
+    <a href="#support" data-i18n="guide_nav_support">Support orgs</a>
   </nav>
 
   <section id="rights" class="space-y-4 pt-8 prose-copy">
-    <h2 class="text-xl font-semibold text-ink">Know your rights</h2>
-    <p class="leading-8">
-      The California Consumer Privacy Act (CCPA), as amended by the California Privacy Rights Act (CPRA),
-      grants privacy rights to <strong>California residents</strong>. However, many companies process privacy
-      requests broadly rather than risk non-compliance, and many states now have similar privacy laws.
-      Sending a CCPA-style request creates a paper trail and puts a company on notice even if you are not
-      a California resident.
-    </p>
-    <p class="leading-8">
-      Most AI surveillance companies meet the CCPA thresholds: over $25 million in annual revenue, or
-      buying, selling, or sharing data on 100,000 or more consumers. When they receive a valid request,
-      they are required to respond within the applicable deadline.
-    </p>
+    <h2 data-i18n="guide_rights_title" class="text-xl font-semibold text-ink">Know your rights</h2>
+    <p data-i18n="guide_rights_p1" class="leading-8"></p>
+    <p data-i18n="guide_rights_p2" class="leading-8"></p>
     <div class="rounded border border-line p-5">
-      <h3 class="text-base font-semibold text-ink">Key deadlines</h3>
+      <h3 data-i18n="guide_deadlines_title" class="text-base font-semibold text-ink">Key deadlines</h3>
       <ul class="mt-3 list-disc space-y-2 pl-5 leading-8">
-        <li><strong>45 calendar days</strong>: Right to Know, Delete, Correct, and Opt Out of Profiling.</li>
-        <li><strong>15 business days</strong>: Opt Out of Sale/Sharing and Limit Sensitive Personal Information.</li>
-        <li>Companies may request one 45-day extension, but they must notify you within the initial response period.</li>
+        <li data-i18n="guide_deadline_45"></li>
+        <li data-i18n="guide_deadline_15"></li>
+        <li data-i18n="guide_deadline_ext"></li>
       </ul>
     </div>
-    <p class="leading-8">
-      If a company fails to respond within the deadline, you can file a complaint with the
-      <strong>California Privacy Protection Agency (CPPA)</strong> and/or the
-      <strong>California Attorney General</strong>. Civil penalties can reach up to $2,500 per violation,
-      or $7,500 per intentional violation.
-    </p>
+    <p data-i18n="guide_penalty" class="leading-8"></p>
   </section>
 
   <section id="sending" class="space-y-4 border-t border-line pt-10 prose-copy">
-    <h2 class="text-xl font-semibold text-ink">How to send your letter</h2>
+    <h2 data-i18n="guide_send_title" class="text-xl font-semibold text-ink">How to send your letter</h2>
     <div class="space-y-4">
       <div class="rounded border border-line p-5">
-        <h3 class="text-base font-semibold text-ink">Option 1: Email</h3>
-        <p class="mt-2 leading-8">Use the company&apos;s privacy email address and keep a copy in your sent folder as proof.</p>
+        <h3 data-i18n="guide_send_email" class="text-base font-semibold text-ink">Option 1: Email</h3>
+        <p data-i18n="guide_send_email_p" class="mt-2 leading-8"></p>
       </div>
       <div class="rounded border border-line p-5">
-        <h3 class="text-base font-semibold text-ink">Option 2: Privacy portal</h3>
-        <p class="mt-2 leading-8">Some companies require submission through an online portal. Paste the letter into the form and save screenshots.</p>
+        <h3 data-i18n="guide_send_portal" class="text-base font-semibold text-ink">Option 2: Privacy portal</h3>
+        <p data-i18n="guide_send_portal_p" class="mt-2 leading-8"></p>
       </div>
       <div class="rounded border border-line p-5">
-        <h3 class="text-base font-semibold text-ink">Option 3: Certified mail</h3>
-        <p class="mt-2 leading-8">Certified mail creates the clearest proof of delivery and gives you a physical record of timing.</p>
+        <h3 data-i18n="guide_send_mail" class="text-base font-semibold text-ink">Option 3: Certified mail</h3>
+        <p data-i18n="guide_send_mail_p" class="mt-2 leading-8"></p>
       </div>
     </div>
   </section>
 
   <section id="tracker" class="space-y-6 border-t border-line pt-10">
     <div id="guide-tracker">
-      <h2 class="text-xl font-semibold text-ink">Deadline tracker</h2>
-      <p class="mt-2 max-w-2xl text-sm leading-7 text-muted">
-        Enter the date you sent your letter and select the rights you requested. The calculation uses the same
-        business-day and calendar-day rules as the main tool.
-      </p>
+      <h2 data-i18n="guide_tracker_title" class="text-xl font-semibold text-ink">Deadline tracker</h2>
+      <p data-i18n="guide_tracker_desc" class="mt-2 max-w-2xl text-sm leading-7 text-muted"></p>
     </div>
     <div class="space-y-6 rounded border border-line p-5">
       <label class="block">
-        <span class="text-sm text-ink">Date you sent the letter</span>
+        <span data-i18n="guide_tracker_date" class="text-sm text-ink">Date you sent the letter</span>
         <input id="guide-sent-date" type="date" class="mt-2 w-full max-w-xs rounded border border-line bg-transparent px-3 py-3 text-ink">
       </label>
       <div>
-        <p class="text-sm text-ink">Rights you requested</p>
+        <p data-i18n="guide_tracker_rights" class="text-sm text-ink">Rights you requested</p>
         <div id="guide-rights-list" class="mt-3 space-y-2"></div>
       </div>
       <div id="guide-deadline-card" class="hidden-panel rounded border border-line p-5">
         <p id="guide-deadline-badge" class="text-sm uppercase tracking-[0.2em] text-muted"></p>
         <p id="guide-deadline-date" class="mt-3 text-lg text-ink"></p>
-        <div class="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+        <div class="mt-4 h-2 overflow-hidden rounded-full bg-line">
           <div id="guide-deadline-bar" class="h-full rounded-full bg-red-500"></div>
         </div>
         <p id="guide-deadline-help" class="mt-3 text-sm leading-7 text-muted"></p>
@@ -102,78 +78,74 @@
 
   <section id="complaint" class="space-y-6 border-t border-line pt-10">
     <div>
-      <h2 class="text-xl font-semibold text-ink">Complaint generator</h2>
-      <p class="mt-2 max-w-2xl text-sm leading-7 text-muted">
-        If a company missed the deadline, generate a formal complaint letter to the CPPA and the California Attorney General.
-      </p>
+      <h2 data-i18n="guide_complaint_title" class="text-xl font-semibold text-ink">Complaint generator</h2>
+      <p data-i18n="guide_complaint_desc" class="mt-2 max-w-2xl text-sm leading-7 text-muted"></p>
     </div>
     <div class="space-y-4 rounded border border-line p-5">
       <label class="block">
-        <span class="text-sm text-ink">Company</span>
+        <span data-i18n="guide_complaint_company" class="text-sm text-ink">Company</span>
         <select id="guide-company" class="mt-2 w-full rounded border border-line bg-page px-3 py-3 text-ink">
-          <option value="">Select a company...</option>
+          <option value="" data-i18n="guide_complaint_select">Select a company...</option>
         </select>
       </label>
       <label class="block">
-        <span class="text-sm text-ink">Date you sent the original letter</span>
+        <span data-i18n="guide_complaint_date" class="text-sm text-ink">Date you sent the original letter</span>
         <input id="guide-complaint-date" type="date" class="mt-2 w-full max-w-xs rounded border border-line bg-transparent px-3 py-3 text-ink">
       </label>
       <div>
-        <p class="text-sm text-ink">Rights you requested</p>
+        <p data-i18n="guide_complaint_rights" class="text-sm text-ink">Rights you requested</p>
         <div id="guide-complaint-rights" class="mt-3 space-y-2"></div>
       </div>
       <label class="block">
-        <span class="text-sm text-ink">Your name</span>
+        <span data-i18n="guide_complaint_name" class="text-sm text-ink">Your name</span>
         <input id="guide-name" type="text" class="mt-2 w-full rounded border border-line bg-transparent px-3 py-3 text-ink">
       </label>
       <label class="block">
-        <span class="text-sm text-ink">Your email</span>
+        <span data-i18n="guide_complaint_email" class="text-sm text-ink">Your email</span>
         <input id="guide-email" type="email" class="mt-2 w-full rounded border border-line bg-transparent px-3 py-3 text-ink">
       </label>
-      <button id="guide-generate-complaint" type="button" class="rounded bg-red-500 px-4 py-3 text-sm font-medium text-ink transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50" disabled>
+      <button id="guide-generate-complaint" type="button" data-i18n="guide_complaint_btn" class="red-card px-4 py-3 text-sm font-medium text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50" disabled>
         Generate complaint letter
       </button>
     </div>
     <div id="guide-complaint-output" class="hidden-panel space-y-4">
-      <textarea id="guide-complaint-letter" readonly class="min-h-[24rem] w-full rounded border border-line bg-transparent px-4 py-4 font-mono text-sm leading-7 text-neutral-200"></textarea>
+      <textarea id="guide-complaint-letter" readonly class="min-h-[24rem] w-full rounded border border-line bg-transparent px-4 py-4 font-mono text-sm leading-7 text-ink"></textarea>
       <div class="flex flex-wrap gap-3">
-        <button id="guide-copy-complaint" type="button" class="rounded border border-line px-4 py-2 text-sm text-neutral-200 transition hover:border-red-500 hover:text-ink">Copy</button>
-        <button id="guide-download-complaint" type="button" class="rounded border border-line px-4 py-2 text-sm text-neutral-200 transition hover:border-red-500 hover:text-ink">Download</button>
+        <button id="guide-copy-complaint" type="button" data-i18n="guide_complaint_copy" class="rounded border border-line px-4 py-2 text-sm text-ink transition hover:border-ice hover:text-ice">Copy</button>
+        <button id="guide-download-complaint" type="button" data-i18n="guide_complaint_download" class="rounded border border-line px-4 py-2 text-sm text-ink transition hover:border-ice hover:text-ice">Download</button>
       </div>
     </div>
   </section>
 
   <section id="filing" class="space-y-4 border-t border-line pt-10 prose-copy">
-    <h2 class="text-xl font-semibold text-ink">How to file a complaint</h2>
+    <h2 data-i18n="guide_file_title" class="text-xl font-semibold text-ink">How to file a complaint</h2>
     <div class="space-y-4">
       <div class="rounded border border-line p-5">
-        <h3 class="text-base font-semibold text-ink">Step 1: File with the CPPA</h3>
-        <p class="mt-2 leading-8">The CPPA has independent enforcement authority and can impose fines of $2,500 to $7,500 per violation.</p>
-        <a class="mt-3 inline-block underline transition hover:text-ink" href="https://cppa.ca.gov/webapplications/complaint" target="_blank" rel="noopener noreferrer">CPPA complaint form</a>
+        <h3 data-i18n="guide_file_step1" class="text-base font-semibold text-ink">Step 1: File with the CPPA</h3>
+        <p data-i18n="guide_file_step1_p" class="mt-2 leading-8"></p>
+        <a class="mt-3 inline-block underline transition hover:text-ice" href="https://cppa.ca.gov/webapplications/complaint" target="_blank" rel="noopener noreferrer">CPPA</a>
       </div>
       <div class="rounded border border-line p-5">
-        <h3 class="text-base font-semibold text-ink">Step 2: File with the California Attorney General</h3>
-        <p class="mt-2 leading-8">The Attorney General has concurrent enforcement authority and may use complaints in pattern-of-practice investigations.</p>
-        <a class="mt-3 inline-block underline transition hover:text-ink" href="https://oag.ca.gov/contact/consumer-complaint-against-business-or-company" target="_blank" rel="noopener noreferrer">Attorney General complaint form</a>
+        <h3 data-i18n="guide_file_step2" class="text-base font-semibold text-ink">Step 2: File with the California Attorney General</h3>
+        <p data-i18n="guide_file_step2_p" class="mt-2 leading-8"></p>
+        <a class="mt-3 inline-block underline transition hover:text-ice" href="https://oag.ca.gov/contact/consumer-complaint-against-business-or-company" target="_blank" rel="noopener noreferrer">CA Attorney General</a>
       </div>
       <div class="rounded border border-line p-5">
-        <h3 class="text-base font-semibold text-ink">Step 3: Keep records</h3>
-        <p class="mt-2 leading-8">Save your original letter, proof of delivery, screenshots, complaint drafts, and any company responses. Keep dates organized.</p>
+        <h3 data-i18n="guide_file_step3" class="text-base font-semibold text-ink">Step 3: Keep records</h3>
+        <p data-i18n="guide_file_step3_p" class="mt-2 leading-8"></p>
       </div>
     </div>
   </section>
 
   <section id="support" class="space-y-4 border-t border-line pt-10 prose-copy">
-    <h2 class="text-xl font-semibold text-ink">Support organizations</h2>
+    <h2 data-i18n="guide_support_title" class="text-xl font-semibold text-ink">Support organizations</h2>
     <div class="grid gap-3 sm:grid-cols-2">
-      <a class="rounded border border-line p-4 text-sm text-ink transition hover:border-red-500 hover:text-ink" href="https://www.aclu.org/issues/immigrants-rights" target="_blank" rel="noopener noreferrer">ACLU Immigrants&apos; Rights Project</a>
-      <a class="rounded border border-line p-4 text-sm text-ink transition hover:border-red-500 hover:text-ink" href="https://www.nilc.org" target="_blank" rel="noopener noreferrer">National Immigration Law Center (NILC)</a>
-      <a class="rounded border border-line p-4 text-sm text-ink transition hover:border-red-500 hover:text-ink" href="https://www.eff.org" target="_blank" rel="noopener noreferrer">Electronic Frontier Foundation (EFF)</a>
-      <a class="rounded border border-line p-4 text-sm text-ink transition hover:border-red-500 hover:text-ink" href="https://nipnlg.org" target="_blank" rel="noopener noreferrer">National Immigration Project</a>
+      <a class="rounded border border-line p-4 text-sm text-ink transition hover:border-ice" href="https://www.aclu.org/issues/immigrants-rights" target="_blank" rel="noopener noreferrer">ACLU Immigrants' Rights Project</a>
+      <a class="rounded border border-line p-4 text-sm text-ink transition hover:border-ice" href="https://www.nilc.org" target="_blank" rel="noopener noreferrer">National Immigration Law Center (NILC)</a>
+      <a class="rounded border border-line p-4 text-sm text-ink transition hover:border-ice" href="https://www.eff.org" target="_blank" rel="noopener noreferrer">Electronic Frontier Foundation (EFF)</a>
+      <a class="rounded border border-line p-4 text-sm text-ink transition hover:border-ice" href="https://nipnlg.org" target="_blank" rel="noopener noreferrer">National Immigration Project</a>
     </div>
-    <p class="text-sm leading-7 text-muted">
-      This page does not collect or store any personal information. Any complaint text you generate is created locally in your browser.
-    </p>
+    <p data-i18n="guide_support_note" class="text-sm leading-7 text-muted"></p>
   </section>
 </div>
 {% endblock %}
