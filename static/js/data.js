@@ -242,6 +242,100 @@ window.OPT_OUT_DATA = {
       headquarteredInCA: false
     }
   ],
+  companyCopy: {
+    es: {
+      "palantir": {
+        description: "Construye el sistema principal de gestión de casos investigativos de ICE (FALCON). Se usa para rastrear, perfilar y dirigir acciones contra inmigrantes.",
+        knownContracts: ["sistema FALCON de ICE", "plataforma investigativa de HSI de ICE", "analítica para CBP"],
+        dataTypes: ["datos de ubicación", "redes sociales", "registros financieros", "registros de viaje", "datos biométricos"]
+      },
+      "clearview-ai": {
+        description: "Empresa de reconocimiento facial que raspó miles de millones de fotos de internet. Usada por ICE y CBP para identificación.",
+        knownContracts: ["reconocimiento facial para HSI de ICE", "identificación para CBP"],
+        dataTypes: ["imágenes faciales", "huellas faciales biométricas", "fotos extraídas de la web", "imágenes de redes sociales"]
+      },
+      "thomson-reuters": {
+        description: "La base de datos CLEAR agrega datos personales de cientos de fuentes. Es la herramienta comercial de datos más usada por ICE para localizar personas.",
+        knownContracts: ["localización para ERO de ICE", "investigaciones de HSI de ICE", "evaluación para CBP"],
+        dataTypes: ["historial de direcciones", "registros telefónicos", "registros de servicios públicos", "matrículas vehiculares", "registros judiciales", "redes sociales"]
+      },
+      "lexisnexis": {
+        description: "Proporciona a ICE acceso a miles de millones de registros de datos para localizar e identificar inmigrantes mediante su producto Accurint.",
+        knownContracts: ["acceso de ICE a la base de datos Accurint", "búsqueda de personas para CBP"],
+        dataTypes: ["datos crediticios", "historial de direcciones", "registros telefónicos", "conexiones de servicios públicos", "registros de propiedades", "datos laborales"]
+      },
+      "amazon": {
+        description: "AWS Rekognition vendió reconocimiento facial a fuerzas del orden. Las alianzas de Ring comparten grabaciones con la policía y autoridades migratorias.",
+        knownContracts: ["infraestructura en la nube para ICE", "licencias de Rekognition para fuerzas del orden"],
+        dataTypes: ["imágenes faciales", "datos de voz", "historial de compras", "datos de ubicación", "videos de Ring"]
+      },
+      "babel-street": {
+        description: "Ofrece la herramienta Locate X a ICE, que usa datos comerciales de ubicación de apps móviles para rastrear personas sin orden judicial.",
+        knownContracts: ["geolocalización Locate X para ICE", "vigilancia de ubicación para CBP"],
+        dataTypes: ["datos de ubicación móvil", "geolocalización derivada de apps", "patrones de movimiento", "redes sociales"]
+      },
+      "vigilant-solutions": {
+        description: "Opera la base de datos de lectores de placas (LPR) más grande de EE. UU. ICE la usa para rastrear vehículos y localizar personas.",
+        knownContracts: ["base de datos de lectores de placas para ICE", "vigilancia en zona fronteriza para CBP"],
+        dataTypes: ["lecturas de placas", "ubicación de vehículos", "patrones de viaje", "marcas de tiempo"]
+      },
+      "shadowdragon": {
+        description: "Herramienta de vigilancia de redes sociales usada por ICE para monitorear actividad en línea y construir perfiles a partir de más de 120 plataformas.",
+        knownContracts: ["monitoreo de redes sociales para ICE", "evaluación para CBP"],
+        dataTypes: ["publicaciones en redes sociales", "actividad en línea", "conexiones de red", "huella digital"]
+      },
+      "giant-oak": {
+        description: "GOST (Giant Oak Search Technology) fue usado por ICE para revisar redes sociales de solicitantes de visa e inmigrantes.",
+        knownContracts: ["evaluación de redes sociales para ICE", "evaluación de visas del DHS"],
+        dataTypes: ["contenido de redes sociales", "perfiles en línea", "análisis de sentimiento", "mapeo de redes"]
+      },
+      "google": {
+        description: "Recopila enormes cantidades de datos personales a través de Search, Gmail, Maps, Android y YouTube. Sus datos han sido citados en casos migratorios mediante órdenes geofence.",
+        knownContracts: ["cumplimiento de órdenes geofence", "servicios en la nube para CBP"],
+        dataTypes: ["historial de búsqueda", "historial de ubicación", "contenido de correos electrónicos", "contactos", "grabaciones de voz", "uso de aplicaciones"]
+      },
+      "meta": {
+        description: "Los datos de redes sociales se han usado en la aplicación de leyes migratorias. ICE ha monitoreado cuentas de Facebook y usado datos en procesos de deportación.",
+        knownContracts: ["monitoreo indirecto de redes sociales por ICE", "solicitudes de datos de fuerzas del orden"],
+        dataTypes: ["conexiones sociales", "publicaciones y mensajes", "check-ins de ubicación", "fotos", "datos de reconocimiento facial", "metadatos de WhatsApp"]
+      },
+      "microsoft": {
+        description: "Servicios en la nube de Azure y datos de LinkedIn. Microsoft ha enfrentado escrutinio por contratos con ICE a través de Azure Government.",
+        knownContracts: ["nube Azure Government para ICE", "agregación de datos de LinkedIn"],
+        dataTypes: ["perfiles profesionales", "contenido de correos electrónicos", "datos en la nube", "datos de navegación", "datos de voz de Cortana"]
+      },
+      "sandvine": {
+        description: "Tecnología de inspección profunda de paquetes que puede monitorear todo el tráfico de internet. Se ha usado por gobiernos de todo el mundo para vigilancia.",
+        knownContracts: ["vigilancia gubernamental de internet", "análisis de tráfico de red"],
+        dataTypes: ["tráfico de internet", "historial de navegación", "uso de aplicaciones", "metadatos de comunicaciones"]
+      },
+      "venntel": {
+        description: "Vendió a ICE y CBP datos de ubicación de teléfonos celulares obtenidos comercialmente, eludiendo requisitos de orden judicial.",
+        knownContracts: ["rastreo de ubicación sin orden judicial para ICE", "rastreo fronterizo para CBP"],
+        dataTypes: ["ubicación de dispositivos móviles", "datos de movimiento derivados de apps", "datos de geocercas"]
+      },
+      "penlink": {
+        description: "Proporciona a ICE herramientas para interceptar y analizar comunicaciones digitales, redes sociales y transacciones financieras.",
+        knownContracts: ["intercepción de comunicaciones para ICE", "vigilancia financiera"],
+        dataTypes: ["datos de comunicaciones", "transacciones financieras", "análisis de redes sociales", "registros de llamadas"]
+      },
+      "att": {
+        description: "Vendió datos de ubicación en tiempo real de teléfonos celulares a corredores externos que los revendieron a cazadores de recompensas y fuerzas del orden, incluida la aplicación migratoria, sin órdenes judiciales.",
+        knownContracts: ["venta de datos de ubicación a corredores", "intercambio de datos con fuerzas del orden"],
+        dataTypes: ["ubicación de teléfonos celulares", "registros de llamadas", "metadatos de mensajes de texto", "información de abonados", "GPS en tiempo real"]
+      },
+      "verizon": {
+        description: "Vendió datos de ubicación de clientes a agregadores como LocationSmart y Zumigo, que los revendieron a compañías de fianzas, cazadores de recompensas y fuerzas del orden sin consentimiento.",
+        knownContracts: ["venta de datos a agregadores de ubicación", "cooperación con fuerzas del orden"],
+        dataTypes: ["ubicación de teléfonos celulares", "registros detallados de llamadas", "datos de abonados", "historial de navegación", "uso de aplicaciones"]
+      },
+      "tmobile": {
+        description: "Vendió datos de ubicación en tiempo real de clientes a agregadores de datos. Pese a prometer que se detendría en 2018, siguió compartiendo datos con terceros usados por fuerzas del orden.",
+        knownContracts: ["venta de datos a agregadores de ubicación", "intercambio continuo de datos tras la promesa de detenerse"],
+        dataTypes: ["ubicación de teléfonos celulares", "registros de llamadas", "información de abonados", "identificadores de dispositivos", "datos de navegación"]
+      }
+    }
+  },
   citations: {
     RIGHT_TO_KNOW: {
       type: "RIGHT_TO_KNOW",
