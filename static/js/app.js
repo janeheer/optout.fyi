@@ -310,20 +310,34 @@
         return company.category === category;
       }).map(function (company) {
         var logoUrl = "https://www.google.com/s2/favicons?domain=" + encodeURIComponent(company.domain || "") + "&sz=32";
+        var referenceId = "company-reference-" + company.id;
         return (
-          "<label class=\"block rounded border border-line p-4 transition hover:border-ice\">" +
-            "<span class=\"flex items-start gap-3\">" +
-              "<input data-company-id=\"" + escapeHtml(company.id) + "\" type=\"checkbox\" class=\"mt-1 h-4 w-4\">" +
-              "<img src=\"" + logoUrl + "\" alt=\"\" width=\"24\" height=\"24\" class=\"mt-0.5 shrink-0 rounded\" loading=\"lazy\">" +
-              "<span class=\"block min-w-0\">" +
-                "<span class=\"block text-sm font-medium text-ink\">" + escapeHtml(company.name) + "</span>" +
-                "<span class=\"mt-1 block text-sm leading-7 text-muted\">" + escapeHtml(company.description) + "</span>" +
-                "<span class=\"mt-2 block text-xs text-muted\">" +
-                  (company.privacyEmail ? escapeHtml(company.privacyEmail) : escapeHtml(translations[lang].noEmail)) +
-                "</span>" +
-              "</span>" +
-            "</span>" +
-          "</label>"
+          "<div class=\"company-reference-item rounded-2xl border border-line bg-page/30 px-4 py-3\" data-company-item=\"" + escapeHtml(company.id) + "\">" +
+            "<div class=\"flex items-center gap-3\">" +
+              "<label class=\"flex min-w-0 flex-1 cursor-pointer items-center gap-3\">" +
+                "<input data-company-id=\"" + escapeHtml(company.id) + "\" type=\"checkbox\" class=\"h-4 w-4 shrink-0\">" +
+                "<img src=\"" + logoUrl + "\" alt=\"\" width=\"24\" height=\"24\" class=\"shrink-0 rounded\" loading=\"lazy\">" +
+                "<span class=\"truncate text-sm font-medium text-ink\">" + escapeHtml(company.name) + "</span>" +
+              "</label>" +
+              "<button type=\"button\" data-company-trigger=\"" + escapeHtml(company.id) + "\" aria-expanded=\"false\" aria-controls=\"" + escapeHtml(referenceId) + "\" class=\"company-reference-trigger shrink-0 rounded-full border border-line bg-white/5 px-2 py-1 text-[0.7rem] font-semibold text-ink/85\">" +
+                "<span class=\"company-reference-mark\">" + escapeHtml(translations[lang].companyReferences) + "</span>" +
+              "</button>" +
+            "</div>" +
+            "<div id=\"" + escapeHtml(referenceId) + "\" class=\"company-reference-popover mt-3 rounded-xl border border-ice/20 bg-panel/95 px-4 py-3 text-sm leading-6 text-muted shadow-lg shadow-page/30\">" +
+              "<p class=\"leading-6 text-muted\">" +
+                "<span class=\"company-reference-kicker\">" + escapeHtml(translations[lang].companyDescriptionLabel) + "</span><br>" +
+                escapeHtml(company.description) +
+              "</p>" +
+              "<p class=\"mt-3 leading-6 text-muted\">" +
+                "<span class=\"company-reference-kicker\">" + escapeHtml(translations[lang].companyContractsLabel) + "</span><br>" +
+                escapeHtml(company.knownContracts.join(", ")) +
+              "</p>" +
+              "<p class=\"mt-3 leading-6 text-muted\">" +
+                "<span class=\"company-reference-kicker\">" + escapeHtml(translations[lang].companyDataLabel) + "</span><br>" +
+                escapeHtml(company.dataTypes.join(", ")) +
+              "</p>" +
+            "</div>" +
+          "</div>"
         );
       }).join("");
 
@@ -356,10 +370,13 @@
   }
 
   function renderIndexPage() {
-    if (!$("language-picker")) {
+    var root = $("index-experience");
+
+    if (!root) {
       return;
     }
 
+    var dockTimer = null;
     var state = {
       lang: null,
       selectedCompanyIds: [],
@@ -370,11 +387,61 @@
       overdueCompanyIds: []
     };
 
+    function clearDockTimer() {
+      if (dockTimer !== null) {
+        window.clearTimeout(dockTimer);
+        dockTimer = null;
+      }
+    }
+
     function setVisible(id, visible) {
       var element = $(id);
       if (element) {
         element.classList.toggle("hidden-panel", !visible);
       }
+    }
+
+    function setFlowState(mode) {
+      root.setAttribute("data-flow-state", mode);
+      if (mode === "countdown") {
+        root.setAttribute("data-card-face", "countdown");
+      } else if (mode === "picker" || mode === "holding") {
+        root.setAttribute("data-card-face", "intro");
+      } else {
+        root.setAttribute("data-card-face", "compact");
+      }
+    }
+
+    function updateLanguageButtons() {
+      ["en", "es"].forEach(function (lang) {
+        var compactButton = $("lang-toggle-" + lang);
+        if (compactButton) {
+          compactButton.setAttribute("aria-pressed", state.lang === lang ? "true" : "false");
+        }
+      });
+    }
+
+    function closeCompanyReferences(exceptId) {
+      document.querySelectorAll("[data-company-item]").forEach(function (item) {
+        var itemId = item.getAttribute("data-company-item");
+        if (exceptId && itemId === exceptId) {
+          return;
+        }
+
+        item.classList.remove("is-open");
+        var trigger = item.querySelector("[data-company-trigger]");
+        if (trigger) {
+          trigger.setAttribute("aria-expanded", "false");
+        }
+      });
+    }
+
+    function startDockSequence() {
+      clearDockTimer();
+      setFlowState("holding");
+      dockTimer = window.setTimeout(function () {
+        setFlowState("docked");
+      }, 1500);
     }
 
     function selectedCompanies() {
@@ -422,6 +489,17 @@
           syncGenerateButton();
         });
       });
+
+      document.querySelectorAll("[data-company-trigger]").forEach(function (button) {
+        var companyId = button.getAttribute("data-company-trigger");
+        button.addEventListener("click", function (event) {
+          var container = event.currentTarget.closest("[data-company-item]");
+          var isOpen = container.classList.contains("is-open");
+          closeCompanyReferences(isOpen ? null : companyId);
+          container.classList.toggle("is-open", !isOpen);
+          button.setAttribute("aria-expanded", isOpen ? "false" : "true");
+        });
+      });
     }
 
     function renderRightsInputs() {
@@ -449,9 +527,13 @@
       if (!state.sentRecord) {
         setVisible("countdown-panel", false);
         setVisible("overdue-panel", false);
+        if (!state.lang) {
+          setFlowState("picker");
+        }
         return;
       }
 
+      clearDockTimer();
       setVisible("explanation-panel", false);
       setVisible("generator", false);
       setVisible("letter-output", false);
@@ -465,6 +547,7 @@
       if (daysLeft < 0) {
         setVisible("countdown-panel", false);
         setVisible("overdue-panel", true);
+        setFlowState("overdue");
         $("times-up-title").textContent = copy.timesUp;
         $("times-up-copy").textContent = copy.overduePre + Math.abs(daysLeft) + copy.overduePost;
         $("overdue-prompt").textContent = copy.overduePrompt;
@@ -513,6 +596,7 @@
 
       setVisible("overdue-panel", false);
       setVisible("countdown-panel", true);
+      setFlowState("countdown");
       $("countdown-status").textContent = state.lang === "es" ? "PLAZO LEGAL EN CURSO" : "LEGAL DEADLINE ACTIVE";
       $("countdown-number").textContent = String(daysLeft);
       $("countdown-copy").textContent = daysLeft === 1 ? copy.dayLeft : copy.daysLeft;
@@ -543,12 +627,10 @@
       }
 
       var copy = text();
-      setVisible("language-picker", false);
-      setVisible("app-shell", true);
-
+      $("red-card-tagline").textContent = copy.tagline;
+      $("red-card-subtitle").textContent = copy.cardIntroSubtitle || copy.subtitle;
       $("hero-title").textContent = copy.tagline;
       $("hero-subtitle").textContent = copy.subtitle;
-      $("lang-toggle").textContent = copy.otherLang;
       $("what-is-title").textContent = copy.whatIsTitle;
       $("what-is-copy").textContent = copy.whatIs;
       $("how-title").textContent = copy.howTitle;
@@ -584,6 +666,7 @@
       $("sender-email").placeholder = copy.email;
 
       $("get-started").textContent = copy.getStarted;
+      updateLanguageButtons();
 
       // Section nav translations
       var navEl = $("generator-nav");
@@ -607,12 +690,6 @@
       renderRightsInputs();
       syncGenerateButton();
       renderCountdown();
-
-      // If no sent record, show explanation first, hide generator
-      if (!state.sentRecord) {
-        setVisible("explanation-panel", true);
-        setVisible("generator", false);
-      }
     }
 
     function generateLetter() {
@@ -653,6 +730,7 @@
     }
 
     function resetState() {
+      clearDockTimer();
       clearSentRecord();
       state.sentRecord = null;
       state.generatedLetter = "";
@@ -671,21 +749,47 @@
 
       setVisible("letter-output", false);
       setVisible("complaint-output", false);
+      setVisible("countdown-panel", false);
+      setVisible("overdue-panel", false);
+      setVisible("explanation-panel", true);
+      setVisible("generator", false);
+      setFlowState("docked");
       renderTexts();
     }
 
-    function setLang(lang) {
+    function setLang(lang, options) {
+      options = options || {};
+      var firstSelection = !state.lang;
       state.lang = lang;
       try { localStorage.setItem("optout_lang", lang); } catch (_e) {}
       renderTexts();
       translatePage(lang);
+
+      if (state.sentRecord) {
+        renderCountdown();
+        return;
+      }
+
+      if (options.skipDockAnimation) {
+        setFlowState("docked");
+        return;
+      }
+
+      if (firstSelection || root.getAttribute("data-flow-state") === "picker" || root.getAttribute("data-flow-state") === "holding") {
+        setVisible("explanation-panel", true);
+        setVisible("generator", false);
+        setVisible("letter-output", false);
+        startDockSequence();
+        return;
+      }
+
+      setFlowState("docked");
     }
 
     $("lang-en").addEventListener("click", function () { setLang("en"); });
     $("lang-es").addEventListener("click", function () { setLang("es"); });
-    $("lang-toggle").addEventListener("click", function () {
-      setLang(state.lang === "en" ? "es" : "en");
-    });
+    $("lang-toggle-en").addEventListener("click", function () { setLang("en", { skipDockAnimation: true }); });
+    $("lang-toggle-es").addEventListener("click", function () { setLang("es", { skipDockAnimation: true }); });
 
     $("get-started").addEventListener("click", function () {
       setVisible("explanation-panel", false);
@@ -749,16 +853,26 @@
     $("overdue-email").addEventListener("input", updateOverdueButton);
     $("start-over").addEventListener("click", resetState);
     $("start-over-overdue").addEventListener("click", resetState);
+    document.addEventListener("click", function (event) {
+      if (!event.target.closest("[data-company-item]")) {
+        closeCompanyReferences();
+      }
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        closeCompanyReferences();
+      }
+    });
 
     // Restore saved language — only auto-advance if there's an active countdown
     var savedLang = null;
     try { savedLang = localStorage.getItem("optout_lang"); } catch (_e) {}
-    if (state.sentRecord && (savedLang === "en" || savedLang === "es")) {
+    if (state.sentRecord) {
       // Active countdown — skip the picker and show countdown directly
-      state.lang = savedLang;
-      renderTexts();
+      setLang(savedLang === "es" ? "es" : "en", { skipDockAnimation: true });
+      return;
     }
-    // Otherwise always show the red card language picker first
+    setFlowState("picker");
   }
 
   function renderGuidePage() {
