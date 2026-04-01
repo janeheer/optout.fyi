@@ -434,6 +434,16 @@
       }) || null;
     }
 
+    function getLocalizedCompanyDetails(companyId) {
+      var localizedCompanies = data.companyCopy && data.companyCopy[state.lang];
+
+      if (!localizedCompanies) {
+        return null;
+      }
+
+      return localizedCompanies[companyId] || null;
+    }
+
     function buildCompanyTooltipHtml(companyId) {
       var company = getCompanyById(companyId);
       var copy = text();
@@ -442,18 +452,23 @@
         return "";
       }
 
+      var localized = getLocalizedCompanyDetails(companyId) || {};
+      var description = localized.description || company.description;
+      var knownContracts = localized.knownContracts || company.knownContracts;
+      var dataTypes = localized.dataTypes || company.dataTypes;
+
       return (
         "<p class=\"leading-6 text-muted\">" +
           "<span class=\"company-reference-kicker\">" + escapeHtml(copy.companyDescriptionLabel) + "</span><br>" +
-          escapeHtml(company.description) +
+          escapeHtml(description) +
         "</p>" +
         "<p class=\"mt-3 leading-6 text-muted\">" +
           "<span class=\"company-reference-kicker\">" + escapeHtml(copy.companyContractsLabel) + "</span><br>" +
-          escapeHtml(company.knownContracts.join(", ")) +
+          escapeHtml(knownContracts.join(", ")) +
         "</p>" +
         "<p class=\"mt-3 leading-6 text-muted\">" +
           "<span class=\"company-reference-kicker\">" + escapeHtml(copy.companyDataLabel) + "</span><br>" +
-          escapeHtml(company.dataTypes.join(", ")) +
+          escapeHtml(dataTypes.join(", ")) +
         "</p>"
       );
     }
