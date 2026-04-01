@@ -750,16 +750,15 @@
     $("start-over").addEventListener("click", resetState);
     $("start-over-overdue").addEventListener("click", resetState);
 
-    // Restore saved language
+    // Restore saved language — only auto-advance if there's an active countdown
     var savedLang = null;
     try { savedLang = localStorage.getItem("optout_lang"); } catch (_e) {}
-    if (savedLang === "en" || savedLang === "es") {
+    if (state.sentRecord && (savedLang === "en" || savedLang === "es")) {
+      // Active countdown — skip the picker and show countdown directly
       state.lang = savedLang;
       renderTexts();
-    } else if (state.sentRecord) {
-      state.lang = "en";
-      renderTexts();
     }
+    // Otherwise always show the red card language picker first
   }
 
   function renderGuidePage() {
