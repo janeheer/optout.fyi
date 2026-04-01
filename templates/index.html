@@ -62,6 +62,17 @@
     padding: 2rem;
   }
 
+  .compact-card-layout {
+    gap: 1.25rem;
+  }
+
+  .compact-card-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
   #index-experience[data-card-face="intro"] #red-card-intro,
   #index-experience[data-card-face="compact"] #red-card-compact,
   #index-experience[data-card-face="countdown"] #red-card-countdown {
@@ -204,9 +215,135 @@
     text-transform: uppercase;
   }
 
+  #generator-nav {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  #generator-nav .section-nav-step {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    justify-content: space-between;
+    min-height: 52px;
+    border-radius: 1rem;
+    background: rgba(22, 32, 50, 0.55);
+    padding: 0.7rem 0.9rem;
+    text-align: left;
+  }
+
+  .section-nav-text {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .section-nav-badge {
+    display: inline-flex;
+    height: 1.75rem;
+    width: 1.75rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    border: 1px solid rgba(139, 163, 185, 0.4);
+    background: rgba(12, 18, 32, 0.5);
+    color: #c8dce8;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .section-nav-status {
+    color: #8ba3b9;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  #generator-nav .section-nav-step.is-current {
+    border-color: rgba(74, 138, 184, 0.6);
+    background: rgba(74, 138, 184, 0.12);
+  }
+
+  #generator-nav .section-nav-step.is-current .section-nav-badge {
+    border-color: rgba(74, 138, 184, 0.85);
+    background: rgba(74, 138, 184, 0.18);
+  }
+
+  #generator-nav .section-nav-step.is-complete .section-nav-badge {
+    border-color: rgba(74, 138, 184, 0.72);
+    background: rgba(74, 138, 184, 0.14);
+    color: #c8dce8;
+  }
+
+  .plain-language-details summary {
+    list-style: none;
+  }
+
+  .plain-language-details summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .send-option-icon {
+    display: inline-flex;
+    height: 2.5rem;
+    width: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    border: 1px solid rgba(74, 138, 184, 0.28);
+    background: rgba(74, 138, 184, 0.08);
+    color: #4a8ab8;
+  }
+
+  .is-disabled-link {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
   @media (hover: none) {
     .company-reference-tooltip {
       width: min(20rem, calc(100vw - 1.25rem));
+    }
+  }
+
+  @media (max-width: 639px) {
+    #index-experience[data-flow-state="docked"] #app-shell,
+    #index-experience[data-flow-state="overdue"] #app-shell {
+      padding-top: 12.75rem;
+    }
+
+    #index-experience[data-flow-state="docked"] #red-card-shell,
+    #index-experience[data-flow-state="overdue"] #red-card-shell {
+      top: 4.75rem;
+      min-height: 9.75rem;
+    }
+
+    .compact-card-layout {
+      gap: 0.9rem;
+      justify-content: center;
+    }
+
+    .compact-card-controls {
+      flex-wrap: wrap;
+    }
+
+    #generator-nav {
+      display: flex;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      margin-inline: -0.25rem;
+      padding-inline: 0.25rem;
+      padding-bottom: 0.75rem;
+      scroll-snap-type: x proximity;
+    }
+
+    #generator-nav .section-nav-step {
+      min-width: max-content;
+      scroll-snap-align: start;
     }
   }
 
@@ -238,6 +375,19 @@
       min-height: 32rem;
     }
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    #index-experience {
+      --flow-ease: linear;
+    }
+
+    #red-card-shell,
+    #red-card-shell *,
+    #app-shell {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
 </style>
 {% endblock %}
 
@@ -248,7 +398,7 @@
       <div id="red-card-intro" class="red-card-face">
         <div class="red-card-face-inner text-center">
           <div class="space-y-5">
-            <p class="text-xs font-bold uppercase tracking-[0.28em] text-white/70">Your digital data red card / Tu tarjeta roja digital</p>
+            <p id="red-card-kicker" class="text-xs font-bold uppercase tracking-[0.28em] text-white/70">Your digital data red card</p>
             <div class="space-y-3">
               <h1 class="text-4xl font-black tracking-tight text-white sm:text-5xl">optout.fyi</h1>
               <p id="red-card-tagline" class="mx-auto max-w-md text-lg font-semibold leading-8 text-white">
@@ -265,7 +415,7 @@
                 English
               </button>
               <button id="lang-es" type="button" class="card-lang-button rounded-xl border-2 border-white/30 bg-white/10 px-5 py-4 text-center font-semibold text-white hover:border-white hover:bg-white/20">
-                Espanol
+                Español
               </button>
             </div>
             <p class="text-xs leading-6 text-white/65">
@@ -277,16 +427,13 @@
       </div>
 
       <div id="red-card-compact" class="red-card-face">
-        <div class="red-card-face-inner">
-          <div class="space-y-4">
-            <p class="text-[0.72rem] font-bold uppercase tracking-[0.24em] text-white/70">Your digital data red card / Tu tarjeta roja digital</p>
-            <div class="space-y-1">
-              <h2 class="text-3xl font-black tracking-tight text-white">optout.fyi</h2>
-              <p class="text-sm leading-6 text-white/75">Your digital data red card / Tu tarjeta roja digital</p>
-            </div>
+        <div class="red-card-face-inner compact-card-layout">
+          <div class="compact-card-copy space-y-2">
+            <h2 class="text-3xl font-black tracking-tight text-white">optout.fyi</h2>
+            <p id="red-card-compact-subtitle" class="text-sm leading-6 text-white/80">Your digital data red card</p>
           </div>
-          <div class="flex items-center justify-between gap-3">
-            <p class="text-xs uppercase tracking-[0.2em] text-white/55">Language</p>
+          <div class="compact-card-controls">
+            <p id="compact-language-label" class="text-xs uppercase tracking-[0.2em] text-white/55">Language</p>
             <div class="inline-flex rounded-full border border-white/20 bg-white/10 p-1">
               <button id="lang-toggle-en" type="button" data-lang-toggle="en" class="compact-lang-button rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-white/72" aria-pressed="false">
                 EN
@@ -326,8 +473,22 @@
   <div id="app-shell" class="space-y-10">
     <section id="explanation-panel" class="space-y-10">
       <div class="space-y-6">
-        <div>
-          <p class="text-sm uppercase tracking-[0.2em] text-muted">Immigrant data rights</p>
+        <div class="space-y-3">
+          <div class="flex flex-wrap items-center gap-3">
+            <p class="text-sm uppercase tracking-[0.2em] text-muted">Immigrant data rights</p>
+            <a
+              id="open-source-link"
+              class="inline-flex items-center gap-2 rounded-full border border-line bg-white/5 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted transition hover:border-ice hover:text-ink"
+              href="https://github.com/janeheer/optout.fyi"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" class="h-4 w-4 fill-current">
+                <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.427 2.865 8.182 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.866-.013-1.7-2.782.605-3.369-1.343-3.369-1.343-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.004.071 1.532 1.032 1.532 1.032.892 1.53 2.341 1.088 2.91.832.091-.647.349-1.088.635-1.338-2.221-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.269 2.75 1.026A9.565 9.565 0 0 1 12 6.844a9.58 9.58 0 0 1 2.504.337c1.909-1.295 2.748-1.026 2.748-1.026.546 1.378.203 2.397.1 2.65.64.7 1.028 1.595 1.028 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.679.92.679 1.855 0 1.338-.012 2.419-.012 2.748 0 .268.18.58.688.482A10.019 10.019 0 0 0 22 12.017C22 6.484 17.523 2 12 2Z"></path>
+              </svg>
+              <span id="open-source-label">Open Source</span>
+            </a>
+          </div>
           <h1 id="hero-title" class="mt-2 text-3xl font-semibold tracking-tight text-ink"></h1>
         </div>
         <p id="hero-subtitle" class="max-w-2xl text-base leading-8 text-muted"></p>
@@ -356,12 +517,65 @@
       <button id="get-started" type="button" class="red-card w-full px-6 py-4 text-base font-bold text-white transition hover:brightness-110"></button>
     </section>
 
+    <section id="how-it-works-panel" class="hidden-panel space-y-5 border-t border-line pt-10">
+      <h2 id="how-it-works-title" class="text-2xl font-semibold text-ink">How it works</h2>
+      <div class="grid gap-4 sm:grid-cols-3">
+        <article class="rounded-2xl border border-line bg-page/35 p-5">
+          <div class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-ice/30 bg-ice/10 text-sm font-bold text-ink">1</div>
+          <h3 id="how-step-1-title" class="mt-4 text-lg font-semibold text-ink">Pick companies</h3>
+          <p id="how-step-1-copy" class="mt-2 text-sm leading-7 text-muted">Choose which AI surveillance companies to send your request to.</p>
+        </article>
+        <article class="rounded-2xl border border-line bg-page/35 p-5">
+          <div class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-ice/30 bg-ice/10 text-sm font-bold text-ink">2</div>
+          <h3 id="how-step-2-title" class="mt-4 text-lg font-semibold text-ink">We build your letter</h3>
+          <p id="how-step-2-copy" class="mt-2 text-sm leading-7 text-muted">A legally grounded CCPA/CPRA letter is generated entirely in your browser. Nothing is sent to any server.</p>
+        </article>
+        <article class="rounded-2xl border border-line bg-page/35 p-5">
+          <div class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-ice/30 bg-ice/10 text-sm font-bold text-ink">3</div>
+          <h3 id="how-step-3-title" class="mt-4 text-lg font-semibold text-ink">You send it</h3>
+          <p id="how-step-3-copy" class="mt-2 text-sm leading-7 text-muted">Download, copy, or email the letter directly to the company.</p>
+        </article>
+      </div>
+    </section>
+
     <section id="generator" class="hidden-panel space-y-10 border-t border-line pt-10">
-      <nav class="section-nav" id="generator-nav">
-        <a href="#step-companies">Companies</a>
-        <a href="#step-rights">Rights</a>
-        <a href="#step-info">Your info</a>
-        <a href="#step-generate">Generate</a>
+      <details id="rights-explainer" class="plain-language-details rounded-2xl border border-line bg-page/35 p-5">
+        <summary class="flex items-center justify-between gap-3 text-left font-semibold text-ink">
+          <span id="plain-rights-title">What are my rights?</span>
+          <span class="rounded-full border border-line px-3 py-1 text-[0.7rem] uppercase tracking-[0.16em] text-muted">CCPA / CPRA</span>
+        </summary>
+        <p id="plain-rights-copy" class="mt-4 max-w-3xl text-sm leading-7 text-muted">The CCPA/CPRA gives California residents the right to know what personal data companies collect, ask for deletion, and opt out of data sales or sharing. You do not need to be a citizen. If your data was collected in California, these rights apply to you. Companies generally have 45 days to respond.</p>
+      </details>
+
+      <nav class="section-nav" id="generator-nav" aria-label="Form progress">
+        <a href="#step-companies" data-step-nav="companies" class="section-nav-step">
+          <span class="section-nav-badge" data-step-badge>1</span>
+          <span class="section-nav-text">
+            <span data-step-label>Companies</span>
+            <span class="section-nav-status" data-step-status hidden></span>
+          </span>
+        </a>
+        <a href="#step-rights" data-step-nav="rights" class="section-nav-step">
+          <span class="section-nav-badge" data-step-badge>2</span>
+          <span class="section-nav-text">
+            <span data-step-label>Rights</span>
+            <span class="section-nav-status" data-step-status hidden></span>
+          </span>
+        </a>
+        <a href="#step-info" data-step-nav="info" class="section-nav-step">
+          <span class="section-nav-badge" data-step-badge>3</span>
+          <span class="section-nav-text">
+            <span data-step-label>Your info</span>
+            <span class="section-nav-status" data-step-status hidden></span>
+          </span>
+        </a>
+        <a href="#step-generate" data-step-nav="generate" class="section-nav-step">
+          <span class="section-nav-badge" data-step-badge>4</span>
+          <span class="section-nav-text">
+            <span data-step-label>Generate</span>
+            <span class="section-nav-status" data-step-status hidden></span>
+          </span>
+        </a>
       </nav>
       <div id="step-companies" class="scroll-mt-32 space-y-5 lg:scroll-mt-10">
         <div class="flex items-center justify-between gap-4">
@@ -399,7 +613,7 @@
       <section id="letter-output" class="hidden-panel space-y-6 border-t border-line pt-10">
         <div>
           <h2 id="letter-heading" class="text-xl font-semibold text-ink"></h2>
-          <p class="mt-3 text-sm leading-7 text-muted">
+          <p id="review-note" class="mt-3 text-sm leading-7 text-muted">
             Review the draft below. Copy it, download it, or open it in your email app.
           </p>
         </div>
@@ -421,6 +635,56 @@
           <button id="download-letter" type="button" class="rounded border border-line px-4 py-2 text-sm text-ink transition hover:border-ice hover:text-ice"></button>
           <a id="open-email" href="#" class="rounded bg-red-500 px-4 py-2 text-sm text-white transition hover:bg-red-600"></a>
         </div>
+        <section id="send-it-panel" class="space-y-5 rounded-2xl border border-line bg-page/35 p-5">
+          <div class="space-y-2">
+            <p id="send-it-step-label" class="text-xs font-bold uppercase tracking-[0.2em] text-muted">Step 5</p>
+            <h3 id="send-it-title" class="text-lg font-semibold text-ink">Send It</h3>
+            <p id="send-it-intro" class="text-sm leading-7 text-muted">Now send this letter to the company. Here's how:</p>
+          </div>
+          <div class="grid gap-3 sm:grid-cols-3">
+            <article class="rounded-2xl border border-line p-4">
+              <div class="send-option-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="h-5 w-5 fill-none stroke-current stroke-[1.8]">
+                  <path d="M4 6h16v12H4z"></path>
+                  <path d="m4 7 8 6 8-6"></path>
+                </svg>
+              </div>
+              <h4 id="send-email-title" class="mt-4 text-sm font-semibold text-ink">Email</h4>
+              <p id="send-email-copy" class="mt-2 text-sm leading-7 text-muted">Open a prefilled draft and send it directly to the company contacts listed above.</p>
+              <a id="send-email-link" href="#" class="mt-4 inline-flex items-center rounded-full border border-line px-4 py-2 text-sm font-medium text-ink transition hover:border-ice hover:text-ice">Open draft email</a>
+            </article>
+            <article class="rounded-2xl border border-line p-4">
+              <div class="send-option-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="h-5 w-5 fill-none stroke-current stroke-[1.8]">
+                  <path d="M7 8V4h10v4"></path>
+                  <path d="M6 18h12v2H6z"></path>
+                  <path d="M5 10h14a2 2 0 0 1 2 2v4H3v-4a2 2 0 0 1 2-2Z"></path>
+                </svg>
+              </div>
+              <h4 id="send-print-title" class="mt-4 text-sm font-semibold text-ink">Print &amp; Mail</h4>
+              <p id="send-print-copy" class="mt-2 text-sm leading-7 text-muted">Use the draft above, print it, and send it by certified mail if you want a paper trail.</p>
+            </article>
+            <article class="rounded-2xl border border-line p-4">
+              <div class="send-option-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="h-5 w-5 fill-none stroke-current stroke-[1.8]">
+                  <path d="M12 3 4 7v6c0 4.2 2.6 6.9 8 8 5.4-1.1 8-3.8 8-8V7l-8-4Z"></path>
+                  <path d="M12 8v5"></path>
+                  <path d="M12 16h.01"></path>
+                </svg>
+              </div>
+              <h4 id="send-complaint-title" class="mt-4 text-sm font-semibold text-ink">File a complaint</h4>
+              <p id="send-complaint-copy" class="mt-2 text-sm leading-7 text-muted">If the company ignores the legal deadline, use these complaint portals:</p>
+              <div class="mt-4 flex flex-wrap gap-2">
+                <a href="https://cppa.ca.gov/complaints" target="_blank" rel="noopener noreferrer" class="inline-flex items-center rounded-full border border-line px-4 py-2 text-sm font-medium text-ink transition hover:border-ice hover:text-ice">
+                  <span id="send-cppa-label">CPPA</span>
+                </a>
+                <a href="https://oag.ca.gov" target="_blank" rel="noopener noreferrer" class="inline-flex items-center rounded-full border border-line px-4 py-2 text-sm font-medium text-ink transition hover:border-ice hover:text-ice">
+                  <span id="send-ag-label">California AG</span>
+                </a>
+              </div>
+            </article>
+          </div>
+        </section>
         <div class="rounded border border-line p-4">
           <label class="flex items-start gap-3">
             <input id="confirm-sent" type="checkbox" class="mt-1 h-4 w-4">
