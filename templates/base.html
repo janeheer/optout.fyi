@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ page_title or "optout.fyi — Your Digital Data Red Card" }}</title>
+  <meta
+    name="description"
+    content="Your digital data red card. Generate legally-grounded CCPA/CPRA privacy rights letters demanding AI surveillance companies delete, disclose, and stop selling your data. No data collected."
+  >
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["Inter", "system-ui", "sans-serif"],
+            mono: ["ui-monospace", "SFMono-Regular", "monospace"]
+          },
+          colors: {
+            page: "#0c1220",
+            ink: "#c8dce8",
+            muted: "#6b8aaa",
+            panel: "#162032",
+            line: "#1e3048",
+            card: "#b91c1c",
+            ice: "#4a8ab8",
+            glow: "#a0cce0",
+            spark: "#d4842a"
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet"
+  >
+  <style>
+    body {
+      background: #0c1220;
+      color: #c8dce8;
+    }
+
+    .prose-copy p,
+    .prose-copy li {
+      color: #6b8aaa;
+    }
+
+    .prose-copy strong {
+      color: #c8dce8;
+    }
+
+    .hidden-panel {
+      display: none;
+    }
+
+    input[type="checkbox"] {
+      accent-color: #4a8ab8;
+    }
+
+    ::selection {
+      background: #4a8ab8;
+      color: #ffffff;
+    }
+
+    *:focus-visible {
+      outline: 2px solid #4a8ab8;
+      outline-offset: 2px;
+    }
+
+    /* Section nav pills */
+    .section-nav {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid #1e3048;
+    }
+    .section-nav a {
+      padding: 0.4rem 0.9rem;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #6b8aaa;
+      border: 1px solid #1e3048;
+      transition: all 0.15s;
+    }
+    .section-nav a:hover {
+      color: #c8dce8;
+      border-color: #4a8ab8;
+      background: rgba(74,138,184,0.1);
+    }
+
+    /* Red card motif */
+    .red-card {
+      background: #dc2626;
+      border-radius: 12px;
+      color: white;
+    }
+
+    .red-card-outline {
+      border: 2px solid #dc2626;
+      border-radius: 12px;
+    }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body class="min-h-screen font-sans antialiased">
+  <a
+    href="#main"
+    class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-red-600 focus:px-3 focus:py-2 focus:text-sm focus:text-ink"
+  >
+    Skip to main content
+  </a>
+
+  <!-- Red stripe at top — homage to the red card -->
+  <div class="h-1 bg-gradient-to-r from-card via-spark to-ice"></div>
+
+  <div class="min-h-screen">
+    <header class="border-b border-line">
+      <div class="mx-auto flex max-w-3xl items-center justify-between px-5 py-4">
+        <a href="/" class="text-xl font-bold tracking-tight text-ink">optout.fyi</a>
+        <nav class="flex items-center gap-4 text-sm text-muted">
+          <a href="/" class="transition hover:text-ice">Letter</a>
+          <a href="/guide" class="transition hover:text-ice">Guide</a>
+          <a href="/resources" class="transition hover:text-ice">Resources</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <div class="mx-auto max-w-3xl px-5 py-10 sm:py-14">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+
+    <footer class="border-t border-line">
+      <div class="mx-auto max-w-3xl px-5 py-8">
+        <div class="flex flex-col gap-2 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
+          <p>Zero data collected. Everything runs in your browser.</p>
+          <p class="text-xs text-muted/60">
+            Made with haste. <a class="underline hover:text-ice" href="mailto:jheer@ucla.edu">Contact</a>.
+            <a class="underline hover:text-ice" href="https://github.com/janeheer/optout.fyi" target="_blank" rel="noopener noreferrer">Source</a>.
+          </p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/data.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

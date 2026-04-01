@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+
+# env files
+.env*
+
+# misc
+.DS_Store
+*.pem
+
+# claude/codex
+CLAUDE.md
+AGENTS.md
+.claude/
+
+# project docs (internal only)
+docs/
+
+# vercel
+.vercel

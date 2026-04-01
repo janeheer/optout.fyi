@@ -1,0 +1,912 @@
+/*
+  OptOut client-side application logic.
+
+  Important privacy rule:
+  - All letter generation happens in JavaScript in the browser.
+  - localStorage stores only countdown metadata:
+    sentDate, companyIds, requestTypes.
+  - Names and email addresses are never persisted.
+*/
+
+(function () {
+  "use strict";
+
+  var data = window.OPT_OUT_DATA;
+
+  if (!data) {
+    return;
+  }
+
+  var companies = data.companies;
+  var citations = data.citations;
+  var requestTypes = data.requestTypes;
+  var translations = data.translations;
+
+  var STORAGE_KEY = "optout_sent";
+  var DEFAULT_RIGHTS = ["RIGHT_TO_DELETE", "OPT_OUT_SALE", "LIMIT_SENSITIVE", "OPT_OUT_PROFILING"];
+  var GUIDE_DEFAULT_RIGHTS = ["RIGHT_TO_DELETE", "OPT_OUT_SALE"];
+  var BATCH_EMAIL_SUBJECT = "CCPA/CPRA Privacy Rights Request";
+
+  function $(id) {
+    return document.getElementById(id);
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function isValidDate(date) {
+    return date instanceof Date && !Number.isNaN(date.getTime());
+  }
+
+  function startOfDay(date) {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  }
+
+  function addDays(date, days) {
+    var result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+  }
+
+  function addBusinessDays(date, days) {
+    var result = new Date(date);
+    var added = 0;
+
+    while (added < days) {
+      result.setDate(result.getDate() + 1);
+      if (result.getDay() !== 0 && result.getDay() !== 6) {
+        added += 1;
+      }
+    }
+
+    return result;
+  }
+
+  function differenceInCalendarDays(a, b) {
+    return Math.round((startOfDay(a).getTime() - startOfDay(b).getTime()) / 86400000);
+  }
+
+  function formatDate(date, lang) {
+    return date.toLocaleDateString(lang === "es" ? "es-US" : "en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    });
+  }
+
+  function isRequestType(value) {
+    return typeof value === "string" && Object.prototype.hasOwnProperty.call(citations, value);
+  }
+
+  function getDeadlineDate(sentDate, selectedRequestTypes) {
+    var sent = startOfDay(typeof sentDate === "string" ? new Date(sentDate) : sentDate);
+
+    if (!isValidDate(sent)) {
+      return sent;
+    }
+
+    if (!selectedRequestTypes || selectedRequestTypes.length === 0) {
+      return addDays(sent, 45);
+    }
+
+    return selectedRequestTypes.reduce(function (latest, requestType) {
+      var citation = citations[requestType];
+      var candidate = citation.deadlineType === "business"
+        ? addBusinessDays(sent, citation.deadlineDays)
+        : addDays(sent, citation.deadlineDays);
+      return candidate.getTime() > latest.getTime() ? candidate : latest;
+    }, sent);
+  }
+
+  function getDeadlineWindowDays(sentDate, selectedRequestTypes) {
+    var sent = startOfDay(typeof sentDate === "string" ? new Date(sentDate) : sentDate);
+    var deadline = getDeadlineDate(sent, selectedRequestTypes);
+
+    if (!isValidDate(sent) || !isValidDate(deadline)) {
+      return 45;
+    }
+
+    return differenceInCalendarDays(deadline, sent);
+  }
+
+  function getDaysRemaining(sentDate, selectedRequestTypes) {
+    var deadline = getDeadlineDate(sentDate, selectedRequestTypes);
+    return differenceInCalendarDays(deadline, startOfDay(new Date()));
+  }
+
+  function getSentRecord() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        return null;
+      }
+
+      var parsed = JSON.parse(raw);
+      var sentDate = typeof parsed.sentDate === "string" ? new Date(parsed.sentDate) : null;
+      var companyIds = Array.isArray(parsed.companyIds) ? parsed.companyIds.filter(function (value) {
+        return typeof value === "string";
+      }) : [];
+      var storedRequestTypes = Array.isArray(parsed.requestTypes) ? parsed.requestTypes.filter(isRequestType) : [];
+
+      if (!sentDate || !isValidDate(sentDate) || companyIds.length === 0) {
+        return null;
+      }
+
+      return {
+        sentDate: sentDate.toISOString(),
+        companyIds: companyIds,
+        requestTypes: storedRequestTypes
+      };
+    } catch (_error) {
+      return null;
+    }
+  }
+
+  function markAsSent(companyIds, selectedRequestTypes) {
+    var record = {
+      sentDate: startOfDay(new Date()).toISOString(),
+      companyIds: companyIds,
+      requestTypes: selectedRequestTypes
+    };
+
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(record));
+    } catch (_error) {
+      // Browser storage may be unavailable. The rest of the tool still works.
+    }
+  }
+
+  function clearSentRecord() {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (_error) {
+      // Ignore storage failures in restricted browsers.
+    }
+  }
+
+  function getSelectedCompanies(selectedCompanyIds) {
+    return companies.filter(function (company) {
+      return selectedCompanyIds.indexOf(company.id) !== -1;
+    });
+  }
+
+  function getBatchRecipientEmails(selectedCompanies) {
+    return selectedCompanies
+      .map(function (company) { return company.privacyEmail; })
+      .filter(function (email) { return Boolean(email); });
+  }
+
+  function getRequestParagraphs(selectedRequestTypes) {
+    var paragraphs = [];
+
+    if (selectedRequestTypes.indexOf("RIGHT_TO_KNOW") !== -1) {
+      paragraphs.push("RIGHT TO KNOW (" + citations.RIGHT_TO_KNOW.statute + "): I request that you disclose to me: (1) the categories of personal information you have collected about me; (2) the specific pieces of personal information you have collected about me; (3) the categories of sources from which the personal information was collected; (4) the business or commercial purpose for collecting, selling, or sharing my personal information; (5) the categories of third parties to whom you have disclosed my personal information; and (6) if you have sold or shared my personal information, the categories of personal information sold or shared and the categories of third parties to whom it was sold or shared.");
+    }
+
+    if (selectedRequestTypes.indexOf("RIGHT_TO_DELETE") !== -1) {
+      paragraphs.push("RIGHT TO DELETE (" + citations.RIGHT_TO_DELETE.statute + "): I request that you delete any and all personal information you have collected from me or about me. I further request that you direct any service providers or contractors with whom you have shared my personal information to delete my personal information from their records as well.");
+    }
+
+    if (selectedRequestTypes.indexOf("RIGHT_TO_CORRECT") !== -1) {
+      paragraphs.push("RIGHT TO CORRECT (" + citations.RIGHT_TO_CORRECT.statute + "): I request that you correct any inaccurate personal information you maintain about me. If your records contain information about me that was obtained through surveillance, data aggregation, or scraping without my knowledge or consent, I dispute the accuracy and completeness of such information in its entirety.");
+    }
+
+    if (selectedRequestTypes.indexOf("OPT_OUT_SALE") !== -1) {
+      paragraphs.push("OPT-OUT OF SALE AND SHARING (" + citations.OPT_OUT_SALE.statute + "): I direct you to stop selling and/or sharing my personal information with third parties, effective immediately. This includes any sharing of personal information for cross-context behavioral advertising, targeted advertising, or any form of profiling. This opt-out must be applied to all personal information you hold about me, including data obtained from any source.");
+    }
+
+    if (selectedRequestTypes.indexOf("LIMIT_SENSITIVE") !== -1) {
+      paragraphs.push("LIMIT USE OF SENSITIVE PERSONAL INFORMATION (" + citations.LIMIT_SENSITIVE.statute + "): I direct you to limit your use and disclosure of my sensitive personal information to only that which is necessary to perform the services or provide the goods reasonably expected. Sensitive personal information includes, but is not limited to: precise geolocation data; racial or ethnic origin; immigration or citizenship status; biometric information; and contents of communications. You are to cease any processing of my sensitive personal information beyond what is strictly necessary.");
+    }
+
+    if (selectedRequestTypes.indexOf("OPT_OUT_PROFILING") !== -1) {
+      paragraphs.push("OPT-OUT OF AUTOMATED DECISION-MAKING AND PROFILING (" + citations.OPT_OUT_PROFILING.statute + "): I opt out of any automated decision-making technology, including profiling, that you use to process my personal information. This includes any AI-powered risk scoring, predictive analytics, behavioral analysis, or pattern recognition that produces legal or similarly significant effects. I request that you stop subjecting my personal information to automated processing for these purposes immediately.");
+    }
+
+    return paragraphs.join("\n\n");
+  }
+
+  function generateBatchLetter(payload) {
+    var today = formatDate(new Date(), "en");
+    var companyList = payload.companies.map(function (company) {
+      return "- " + company.name;
+    }).join("\n");
+
+    return today + "\n\n" +
+      "To Whom It May Concern:\n\n" +
+      "I am writing to exercise my rights under the California Consumer Privacy Act of 2018 (\"CCPA\"), as amended by the California Privacy Rights Act of 2020 (\"CPRA\"), codified at California Civil Code sections 1798.100 through 1798.199.100.\n\n" +
+      "Your company is subject to the CCPA/CPRA because it does business in the State of California and meets one or more of the applicability thresholds set forth in Cal. Civ. Code \u00A7 1798.140(d). Your collection, processing, sale, and/or sharing of personal information \u2014 including through surveillance technologies, data aggregation, and automated decision-making systems \u2014 triggers obligations under this law.\n\n" +
+      "I hereby make the following requests:\n\n" +
+      getRequestParagraphs(payload.requestTypes) + "\n\n" +
+      "VERIFICATION: For purposes of verifying my identity in connection with this request, my name is " + payload.senderName + " and my email address is " + payload.senderEmail + ". I declare under penalty of perjury that I am the consumer whose personal information is the subject of this request.\n\n" +
+      "LEGAL OBLIGATIONS AND DEADLINES: Under the CCPA/CPRA, you are required to respond to this request within forty-five (45) calendar days of receipt. If you require an extension, you must notify me within the initial 45-day period and may extend by no more than an additional 45 calendar days. For opt-out requests under \u00A7 1798.120 and \u00A7 1798.121, you must comply within fifteen (15) business days.\n\n" +
+      "You may not discriminate against me for exercising these rights, as prohibited by Cal. Civ. Code \u00A7 1798.125.\n\n" +
+      "NOTICE OF INTENT: If you fail to respond to this request within the statutory deadline, I intend to file a complaint with the California Privacy Protection Agency (CPPA) and/or the California Attorney General's Office. Under CPRA, the 30-day right-to-cure period has been eliminated for most violations, and the CPPA has independent enforcement authority with penalties of up to $2,500 per violation, or $7,500 per intentional violation or violation involving minors.\n\n" +
+      "I look forward to your timely response.\n\n" +
+      "Sincerely,\n\n" +
+      payload.senderName + "\n" +
+      payload.senderEmail;
+  }
+
+  function generateComplaintLetter(payload, sentDate) {
+    var today = formatDate(new Date(), "en");
+    var originalDate = formatDate(sentDate, "en");
+
+    return today + "\n\n" +
+      payload.senderName + "\n" +
+      payload.senderEmail + "\n\n" +
+      "TO:\nCalifornia Privacy Protection Agency\n2101 Arena Boulevard\nSacramento, CA 95834\ncomplaints@cppa.ca.gov\n\n" +
+      "AND:\n\nOffice of the Attorney General\nCalifornia Department of Justice\nAttn: Public Inquiry Unit\nP.O. Box 944255\nSacramento, CA 94244-2550\n\n" +
+      "RE: COMPLAINT \u2014 FAILURE TO RESPOND TO CCPA/CPRA PRIVACY RIGHTS REQUEST\n\n" +
+      "Dear California Privacy Protection Agency and Office of the Attorney General:\n\n" +
+      "I am filing this complaint regarding " + payload.company.name + "'s failure to comply with the California Consumer Privacy Act / California Privacy Rights Act.\n\n" +
+      "FACTS:\n\n" +
+      "1. On " + originalDate + ", I submitted a verifiable consumer request to " + payload.company.name + " exercising the following rights under the CCPA/CPRA:\n" +
+      payload.requestTypes.map(function (type) {
+        return "   - " + citations[type].label + " (" + citations[type].statute + ")";
+      }).join("\n") + "\n\n" +
+      "2. The request was sent to:\n   " + (payload.company.privacyEmail ? "Email: " + payload.company.privacyEmail : "") + "\n   " + (payload.company.privacyAddress || payload.company.name) + "\n\n" +
+      "3. As of " + today + ", the applicable statutory response deadline has elapsed, and " + payload.company.name + " has:\n   [ ] Failed to respond entirely\n   [ ] Failed to provide a complete response\n   [ ] Failed to acknowledge receipt within the statutory period\n   (Please check all that apply)\n\n" +
+      "4. " + payload.company.name + " is known to collect and process personal information for the following purposes: " + payload.company.knownContracts.join("; ") + ".\n\n" +
+      "LEGAL BASIS:\n\n" +
+      "Under Cal. Civ. Code \u00A7 1798.105, \u00A7 1798.110, \u00A7 1798.120, \u00A7 1798.121, and related provisions, businesses are required to respond within the applicable statutory deadlines, including 45 calendar days for access, deletion, correction, and similar requests, and 15 business days for opt-out and sensitive-information limitation requests. The CPRA eliminated the 30-day cure period for most violations (effective January 1, 2023). The CPPA has independent enforcement authority under Cal. Civ. Code \u00A7 1798.199.40 et seq.\n\n" +
+      "Each failure to respond to a consumer request constitutes a separate violation, subject to penalties of up to $2,500 per violation, or $7,500 per intentional violation.\n\n" +
+      "REQUESTED ACTION:\n\nI respectfully request that your office:\n1. Investigate " + payload.company.name + "'s failure to comply with the CCPA/CPRA;\n2. Take appropriate enforcement action; and\n3. Ensure that " + payload.company.name + " fulfills its statutory obligations.\n\n" +
+      "I have attached a copy of my original request for your reference.\n\n" +
+      "Sincerely,\n\n" +
+      payload.senderName + "\n" +
+      payload.senderEmail + "\n\n" +
+      "Enclosure: Original CCPA/CPRA request dated " + originalDate;
+  }
+
+  function buildMailtoUrl(payload) {
+    var emails = getBatchRecipientEmails(payload.companies);
+    if (emails.length === 0) {
+      return "";
+    }
+
+    return "mailto:" + payload.senderEmail +
+      "?subject=" + encodeURIComponent(BATCH_EMAIL_SUBJECT) +
+      "&bcc=" + emails.join(",") +
+      "&body=" + encodeURIComponent(generateBatchLetter(payload));
+  }
+
+  function copyText(text, button, defaultLabel, copiedLabel) {
+    navigator.clipboard.writeText(text).then(function () {
+      button.textContent = copiedLabel;
+      window.setTimeout(function () {
+        button.textContent = defaultLabel;
+      }, 2000);
+    }).catch(function () {
+      window.alert("Clipboard access is unavailable. Use download instead.");
+    });
+  }
+
+  function downloadText(filename, text) {
+    var blob = new Blob([text], { type: "text/plain" });
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function buildCompanyGroups(lang) {
+    var labels = {
+      surveillance: translations[lang].catSurveillance,
+      dataBrokers: translations[lang].catDataBrokers,
+      telecom: translations[lang].catTelecom
+    };
+
+    return ["surveillance", "dataBrokers", "telecom"].map(function (category) {
+      var items = companies.filter(function (company) {
+        return company.category === category;
+      }).map(function (company) {
+        var logoUrl = "https://www.google.com/s2/favicons?domain=" + encodeURIComponent(company.domain || "") + "&sz=32";
+        return (
+          "<label class=\"block rounded border border-line p-4 transition hover:border-ice\">" +
+            "<span class=\"flex items-start gap-3\">" +
+              "<input data-company-id=\"" + escapeHtml(company.id) + "\" type=\"checkbox\" class=\"mt-1 h-4 w-4\">" +
+              "<img src=\"" + logoUrl + "\" alt=\"\" width=\"24\" height=\"24\" class=\"mt-0.5 shrink-0 rounded\" loading=\"lazy\">" +
+              "<span class=\"block min-w-0\">" +
+                "<span class=\"block text-sm font-medium text-ink\">" + escapeHtml(company.name) + "</span>" +
+                "<span class=\"mt-1 block text-sm leading-7 text-muted\">" + escapeHtml(company.description) + "</span>" +
+                "<span class=\"mt-2 block text-xs text-muted\">" +
+                  (company.privacyEmail ? escapeHtml(company.privacyEmail) : escapeHtml(translations[lang].noEmail)) +
+                "</span>" +
+              "</span>" +
+            "</span>" +
+          "</label>"
+        );
+      }).join("");
+
+      return (
+        "<div class=\"space-y-3\">" +
+          "<h3 class=\"text-xs uppercase tracking-[0.2em] text-muted\">" + escapeHtml(labels[category]) + "</h3>" +
+          "<div class=\"space-y-3\">" + items + "</div>" +
+        "</div>"
+      );
+    }).join("");
+  }
+
+  function buildRightsList(selectedRights) {
+    return requestTypes.map(function (type) {
+      var citation = citations[type];
+      var checked = selectedRights.indexOf(type) !== -1 ? " checked" : "";
+
+      return (
+        "<label class=\"block rounded border border-line p-4 transition hover:border-ice\">" +
+          "<span class=\"flex items-start gap-3\">" +
+            "<input data-right-type=\"" + escapeHtml(type) + "\" type=\"checkbox\" class=\"mt-1 h-4 w-4\"" + checked + ">" +
+            "<span class=\"block\">" +
+              "<span class=\"block text-sm font-medium text-ink\">" + escapeHtml(citation.label) + "</span>" +
+              "<span class=\"mt-1 block text-sm leading-7 text-muted\">" + escapeHtml(citation.shortDescription) + "</span>" +
+            "</span>" +
+          "</span>" +
+        "</label>"
+      );
+    }).join("");
+  }
+
+  function renderIndexPage() {
+    if (!$("language-picker")) {
+      return;
+    }
+
+    var state = {
+      lang: null,
+      selectedCompanyIds: [],
+      selectedRights: DEFAULT_RIGHTS.slice(),
+      generatedLetter: "",
+      complaintLetter: "",
+      sentRecord: getSentRecord(),
+      overdueCompanyIds: []
+    };
+
+    function setVisible(id, visible) {
+      var element = $(id);
+      if (element) {
+        element.classList.toggle("hidden-panel", !visible);
+      }
+    }
+
+    function selectedCompanies() {
+      return getSelectedCompanies(state.selectedCompanyIds);
+    }
+
+    function text() {
+      return translations[state.lang || "en"];
+    }
+
+    function syncGenerateButton() {
+      var copy = text();
+      var name = $("sender-name").value.trim();
+      var email = $("sender-email").value.trim();
+      var canGenerate = state.selectedCompanyIds.length > 0 && state.selectedRights.length > 0 && name && email;
+      $("generate-letter").disabled = !canGenerate;
+      $("generate-letter").textContent = copy.generate + (state.selectedCompanyIds.length ? " " + copy.forGenerating + " " + state.selectedCompanyIds.length : "");
+    }
+
+    function syncStartCountdownButton() {
+      $("start-countdown").disabled = !$("confirm-sent").checked;
+    }
+
+    function updateOverdueButton() {
+      var name = $("overdue-name").value.trim();
+      var email = $("overdue-email").value.trim();
+      $("generate-complaint").disabled = !(state.overdueCompanyIds.length > 0 && name && email);
+    }
+
+    function renderCompanyInputs() {
+      $("company-groups").innerHTML = buildCompanyGroups(state.lang);
+      document.querySelectorAll("[data-company-id]").forEach(function (box) {
+        var companyId = box.getAttribute("data-company-id");
+        box.checked = state.selectedCompanyIds.indexOf(companyId) !== -1;
+        box.addEventListener("change", function () {
+          if (box.checked) {
+            if (state.selectedCompanyIds.indexOf(companyId) === -1) {
+              state.selectedCompanyIds.push(companyId);
+            }
+          } else {
+            state.selectedCompanyIds = state.selectedCompanyIds.filter(function (value) {
+              return value !== companyId;
+            });
+          }
+          syncGenerateButton();
+        });
+      });
+    }
+
+    function renderRightsInputs() {
+      $("rights-list").innerHTML = buildRightsList(state.selectedRights);
+      document.querySelectorAll("[data-right-type]").forEach(function (box) {
+        var type = box.getAttribute("data-right-type");
+        box.addEventListener("change", function () {
+          if (box.checked) {
+            if (state.selectedRights.indexOf(type) === -1) {
+              state.selectedRights.push(type);
+            }
+          } else {
+            state.selectedRights = state.selectedRights.filter(function (value) {
+              return value !== type;
+            });
+          }
+          syncGenerateButton();
+        });
+      });
+    }
+
+    function renderCountdown() {
+      var copy = text();
+
+      if (!state.sentRecord) {
+        setVisible("countdown-panel", false);
+        setVisible("overdue-panel", false);
+        return;
+      }
+
+      setVisible("explanation-panel", false);
+      setVisible("generator", false);
+      setVisible("letter-output", false);
+
+      var sentDate = new Date(state.sentRecord.sentDate);
+      var totalWindowDays = getDeadlineWindowDays(sentDate, state.sentRecord.requestTypes);
+      var deadlineDate = getDeadlineDate(sentDate, state.sentRecord.requestTypes);
+      var daysLeft = getDaysRemaining(state.sentRecord.sentDate, state.sentRecord.requestTypes);
+      var notifiedCompanies = getSelectedCompanies(state.sentRecord.companyIds);
+
+      if (daysLeft < 0) {
+        setVisible("countdown-panel", false);
+        setVisible("overdue-panel", true);
+        $("times-up-title").textContent = copy.timesUp;
+        $("times-up-copy").textContent = copy.overduePre + Math.abs(daysLeft) + copy.overduePost;
+        $("overdue-prompt").textContent = copy.overduePrompt;
+        $("overdue-note").textContent = copy.overdueNote;
+        $("overdue-name-label").textContent = copy.fullName;
+        $("overdue-email-label").textContent = copy.email;
+        $("generate-complaint").textContent = copy.generateComplaint;
+        $("complaint-heading").textContent = copy.complaintTitle;
+        $("copy-complaint").textContent = copy.copy;
+        $("download-complaint").textContent = copy.download;
+        $("cppa-title").textContent = copy.fileCPPA;
+        $("cppa-note").textContent = copy.fileCPPANote;
+        $("ag-title").textContent = copy.fileAG;
+        $("ag-note").textContent = copy.fileAGNote;
+        $("start-over-overdue").textContent = copy.startOver;
+        $("overdue-company-list").innerHTML = notifiedCompanies.map(function (company) {
+          return (
+            "<label class=\"block rounded border border-line p-4 transition hover:border-ice\">" +
+              "<span class=\"flex items-start gap-3\">" +
+                "<input data-overdue-id=\"" + escapeHtml(company.id) + "\" type=\"checkbox\" class=\"mt-1 h-4 w-4\">" +
+                "<span class=\"text-sm text-ink\">" + escapeHtml(company.name) + "</span>" +
+              "</span>" +
+            "</label>"
+          );
+        }).join("");
+
+        document.querySelectorAll("[data-overdue-id]").forEach(function (box) {
+          var companyId = box.getAttribute("data-overdue-id");
+          box.addEventListener("change", function () {
+            if (box.checked) {
+              if (state.overdueCompanyIds.indexOf(companyId) === -1) {
+                state.overdueCompanyIds.push(companyId);
+              }
+            } else {
+              state.overdueCompanyIds = state.overdueCompanyIds.filter(function (value) {
+                return value !== companyId;
+              });
+            }
+            updateOverdueButton();
+          });
+        });
+
+        updateOverdueButton();
+        return;
+      }
+
+      setVisible("overdue-panel", false);
+      setVisible("countdown-panel", true);
+      $("countdown-status").textContent = state.lang === "es" ? "PLAZO LEGAL EN CURSO" : "LEGAL DEADLINE ACTIVE";
+      $("countdown-number").textContent = String(daysLeft);
+      $("countdown-copy").textContent = daysLeft === 1 ? copy.dayLeft : copy.daysLeft;
+      $("countdown-dates").textContent = copy.sentOn + " " + formatDate(sentDate, state.lang) + " · " + copy.deadline + " " + formatDate(deadlineDate, state.lang);
+      $("companies-notified").textContent = state.lang === "es"
+        ? "EMPRESAS LEGALMENTE OBLIGADAS A RESPONDER"
+        : "COMPANIES LEGALLY OBLIGATED TO RESPOND";
+      $("countdown-legal-notice").textContent = state.lang === "es"
+        ? "Las siguientes empresas han recibido su solicitud de derechos de privacidad bajo CCPA/CPRA y est\u00e1n legalmente obligadas a responder dentro del plazo indicado. El incumplimiento constituye una violaci\u00f3n sujeta a multas de hasta $7,500 por infracci\u00f3n."
+        : "The following companies have been served your CCPA/CPRA privacy rights request and are legally obligated to respond within the deadline above. Failure to comply constitutes a violation subject to penalties of up to $7,500 per infraction.";
+      $("countdown-note").textContent = copy.countdownNote;
+      $("start-over").textContent = copy.startOver;
+      $("notified-company-list").innerHTML = notifiedCompanies.map(function (company) {
+        var logoUrl = "https://www.google.com/s2/favicons?domain=" + encodeURIComponent(company.domain || "") + "&sz=32";
+        return "<span class=\"inline-flex items-center gap-2 rounded border border-red-600/30 bg-red-600/5 px-3 py-2 text-sm font-medium text-ink\">" +
+          "<img src=\"" + logoUrl + "\" alt=\"\" width=\"16\" height=\"16\" class=\"shrink-0 rounded\" loading=\"lazy\">" +
+          escapeHtml(company.name) + "</span>";
+      }).join("");
+
+      var progress = ((totalWindowDays - daysLeft) / totalWindowDays) * 100;
+      $("countdown-bar").style.width = Math.max(0, Math.min(100, progress)) + "%";
+      $("countdown-bar").className = "h-full rounded-full " + (daysLeft <= 5 ? "bg-red-500" : (daysLeft <= 15 ? "bg-yellow-500" : "bg-green-500"));
+    }
+
+    function renderTexts() {
+      if (!state.lang) {
+        return;
+      }
+
+      var copy = text();
+      setVisible("language-picker", false);
+      setVisible("app-shell", true);
+
+      $("hero-title").textContent = copy.tagline;
+      $("hero-subtitle").textContent = copy.subtitle;
+      $("lang-toggle").textContent = copy.otherLang;
+      $("what-is-title").textContent = copy.whatIsTitle;
+      $("what-is-copy").textContent = copy.whatIs;
+      $("how-title").textContent = copy.howTitle;
+      $("how-copy").textContent = copy.how;
+      $("what-not-title").textContent = copy.whatNotTitle;
+      $("what-not-list").innerHTML = [copy.whatNot1, copy.whatNot2, copy.whatNot3, copy.whatNot4].map(function (item) {
+        return "<li>" + escapeHtml(item) + "</li>";
+      }).join("");
+      $("who-title").textContent = copy.whoTitle;
+      $("who-copy").textContent = copy.who;
+      $("legal-disclaimer-top").textContent = copy.legalDisclaimer;
+      $("companies-heading").textContent = copy.selectCompanies;
+      $("select-all-companies").textContent = copy.selectAll + " (" + companies.length + ")";
+      $("rights-heading").textContent = copy.yourRights;
+      $("rights-note").textContent = copy.rightsNote;
+      $("info-heading").textContent = copy.yourInfo;
+      $("info-note").textContent = copy.infoNote;
+      $("name-label").textContent = copy.fullName;
+      $("email-label").textContent = copy.email;
+      $("letter-heading").textContent = copy.yourLetter;
+      $("subject-label").textContent = copy.emailSubject + ": ";
+      $("email-subject").textContent = BATCH_EMAIL_SUBJECT;
+      $("bcc-label").textContent = copy.emailBcc + ": ";
+      $("bcc-explain").textContent = copy.bccExplain;
+      $("copy-letter").textContent = copy.copy;
+      $("download-letter").textContent = copy.download;
+      $("open-email").textContent = copy.openEmail;
+      $("sent-label").textContent = copy.iSentIt;
+      $("sent-description").textContent = copy.iSentItDesc;
+      $("start-countdown").textContent = copy.startCountdown;
+      $("legal-disclaimer-bottom").textContent = copy.legalDisclaimer;
+      $("sender-name").placeholder = copy.fullName;
+      $("sender-email").placeholder = copy.email;
+
+      $("get-started").textContent = copy.getStarted;
+
+      // Section nav translations
+      var navEl = $("generator-nav");
+      if (navEl) {
+        var navLinks = navEl.querySelectorAll("a");
+        var navLabels = state.lang === "es"
+          ? ["Empresas", "Derechos", "Tu info", "Generar"]
+          : ["Companies", "Rights", "Your info", "Generate"];
+        navLinks.forEach(function (link, i) { if (navLabels[i]) link.textContent = navLabels[i]; });
+      }
+
+      // Letter review text
+      var reviewP = document.querySelector("#letter-output > div > p");
+      if (reviewP) {
+        reviewP.textContent = state.lang === "es"
+          ? "Revisa el borrador. C\u00f3pialo, desc\u00e1rgalo o \u00e1brelo en tu app de email."
+          : "Review the draft below. Copy it, download it, or open it in your email app.";
+      }
+
+      renderCompanyInputs();
+      renderRightsInputs();
+      syncGenerateButton();
+      renderCountdown();
+
+      // If no sent record, show explanation first, hide generator
+      if (!state.sentRecord) {
+        setVisible("explanation-panel", true);
+        setVisible("generator", false);
+      }
+    }
+
+    function generateLetter() {
+      var name = $("sender-name").value.trim();
+      var email = $("sender-email").value.trim();
+      var selected = selectedCompanies();
+      var payload = {
+        senderName: name,
+        senderEmail: email,
+        companies: selected,
+        requestTypes: state.selectedRights.slice()
+      };
+      var copy = text();
+      var portalOnly = selected.filter(function (company) {
+        return !company.privacyEmail;
+      });
+
+      state.generatedLetter = generateBatchLetter(payload);
+      $("generated-letter").value = state.generatedLetter;
+      $("bcc-emails").textContent = getBatchRecipientEmails(selected).join(", ");
+      $("open-email").href = buildMailtoUrl(payload) || "#";
+
+      if (portalOnly.length > 0) {
+        $("no-email-warning").innerHTML = escapeHtml(copy.noEmailWarning) + " " + portalOnly.map(function (company) {
+          if (company.privacyUrl) {
+            return "<a href=\"" + escapeHtml(company.privacyUrl) + "\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"underline text-red-400 hover:text-ink\">" + escapeHtml(company.name) + "</a>";
+          }
+          return escapeHtml(company.name);
+        }).join(", ");
+        setVisible("no-email-warning", true);
+      } else {
+        setVisible("no-email-warning", false);
+      }
+
+      setVisible("letter-output", true);
+      $("confirm-sent").checked = false;
+      syncStartCountdownButton();
+    }
+
+    function resetState() {
+      clearSentRecord();
+      state.sentRecord = null;
+      state.generatedLetter = "";
+      state.complaintLetter = "";
+      state.selectedCompanyIds = [];
+      state.selectedRights = DEFAULT_RIGHTS.slice();
+      state.overdueCompanyIds = [];
+
+      $("sender-name").value = "";
+      $("sender-email").value = "";
+      $("overdue-name").value = "";
+      $("overdue-email").value = "";
+      $("generated-letter").value = "";
+      $("complaint-letter").value = "";
+      $("confirm-sent").checked = false;
+
+      setVisible("letter-output", false);
+      setVisible("complaint-output", false);
+      renderTexts();
+    }
+
+    function setLang(lang) {
+      state.lang = lang;
+      try { localStorage.setItem("optout_lang", lang); } catch (_e) {}
+      renderTexts();
+    }
+
+    $("lang-en").addEventListener("click", function () { setLang("en"); });
+    $("lang-es").addEventListener("click", function () { setLang("es"); });
+    $("lang-toggle").addEventListener("click", function () {
+      setLang(state.lang === "en" ? "es" : "en");
+    });
+
+    $("get-started").addEventListener("click", function () {
+      setVisible("explanation-panel", false);
+      setVisible("generator", true);
+    });
+
+    $("select-all-companies").addEventListener("click", function () {
+      state.selectedCompanyIds = companies.map(function (company) {
+        return company.id;
+      });
+      renderCompanyInputs();
+      syncGenerateButton();
+    });
+
+    $("sender-name").addEventListener("input", syncGenerateButton);
+    $("sender-email").addEventListener("input", syncGenerateButton);
+    $("generate-letter").addEventListener("click", generateLetter);
+    $("confirm-sent").addEventListener("change", syncStartCountdownButton);
+
+    $("start-countdown").addEventListener("click", function () {
+      markAsSent(state.selectedCompanyIds.slice(), state.selectedRights.slice());
+      state.sentRecord = getSentRecord();
+      state.overdueCompanyIds = [];
+      renderCountdown();
+    });
+
+    $("copy-letter").addEventListener("click", function () {
+      copyText(state.generatedLetter, $("copy-letter"), text().copy, text().copied);
+    });
+
+    $("download-letter").addEventListener("click", function () {
+      downloadText("optout-ccpa-request.txt", state.generatedLetter);
+    });
+
+    $("generate-complaint").addEventListener("click", function () {
+      var complaintRights = state.sentRecord.requestTypes.length ? state.sentRecord.requestTypes.slice() : ["RIGHT_TO_DELETE", "OPT_OUT_SALE"];
+      var sentDate = new Date(state.sentRecord.sentDate);
+      var letters = getSelectedCompanies(state.overdueCompanyIds).map(function (company) {
+        return generateComplaintLetter({
+          senderName: $("overdue-name").value.trim(),
+          senderEmail: $("overdue-email").value.trim(),
+          company: company,
+          requestTypes: complaintRights
+        }, sentDate);
+      });
+
+      state.complaintLetter = letters.join("\n\n" + "=".repeat(60) + "\n\n");
+      $("complaint-letter").value = state.complaintLetter;
+      setVisible("complaint-output", true);
+    });
+
+    $("copy-complaint").addEventListener("click", function () {
+      copyText(state.complaintLetter, $("copy-complaint"), text().copy, text().copied);
+    });
+
+    $("download-complaint").addEventListener("click", function () {
+      downloadText("optout-complaint.txt", state.complaintLetter);
+    });
+
+    $("overdue-name").addEventListener("input", updateOverdueButton);
+    $("overdue-email").addEventListener("input", updateOverdueButton);
+    $("start-over").addEventListener("click", resetState);
+    $("start-over-overdue").addEventListener("click", resetState);
+
+    // Restore saved language
+    var savedLang = null;
+    try { savedLang = localStorage.getItem("optout_lang"); } catch (_e) {}
+    if (savedLang === "en" || savedLang === "es") {
+      state.lang = savedLang;
+      renderTexts();
+    } else if (state.sentRecord) {
+      state.lang = "en";
+      renderTexts();
+    }
+  }
+
+  function renderGuidePage() {
+    if (!$("guide-rights-list")) {
+      return;
+    }
+
+    var trackerState = {
+      selectedRights: GUIDE_DEFAULT_RIGHTS.slice(),
+      selectedComplaintRights: GUIDE_DEFAULT_RIGHTS.slice(),
+      complaintLetter: ""
+    };
+
+    function renderGuideRights(containerId, selectedValues, inputName) {
+      $(containerId).innerHTML = requestTypes.map(function (type) {
+        var citation = citations[type];
+        var checked = selectedValues.indexOf(type) !== -1 ? " checked" : "";
+
+        return (
+          "<label class=\"block text-sm text-neutral-300\">" +
+            "<span class=\"flex items-start gap-3 rounded border border-line p-3\">" +
+              "<input data-guide-name=\"" + escapeHtml(inputName) + "\" data-guide-type=\"" + escapeHtml(type) + "\" type=\"checkbox\" class=\"mt-1 h-4 w-4\"" + checked + ">" +
+              "<span>" +
+                "<span class=\"block text-ink\">" + escapeHtml(citation.label) + "</span>" +
+                "<span class=\"mt-1 block leading-7 text-muted\">" + escapeHtml(citation.shortDescription) + "</span>" +
+              "</span>" +
+            "</span>" +
+          "</label>"
+        );
+      }).join("");
+    }
+
+    function refreshTracker() {
+      var rawDate = $("guide-sent-date").value;
+      if (!rawDate) {
+        $("guide-deadline-card").classList.add("hidden-panel");
+        return;
+      }
+
+      var sentDate = new Date(rawDate + "T00:00:00");
+      if (!isValidDate(sentDate)) {
+        $("guide-deadline-card").classList.add("hidden-panel");
+        return;
+      }
+
+      var deadline = getDeadlineDate(sentDate, trackerState.selectedRights);
+      var daysRemaining = getDaysRemaining(sentDate.toISOString(), trackerState.selectedRights);
+      var totalWindowDays = getDeadlineWindowDays(sentDate, trackerState.selectedRights);
+      var progress = daysRemaining < 0 ? 100 : ((totalWindowDays - daysRemaining) / totalWindowDays) * 100;
+
+      $("guide-deadline-card").classList.remove("hidden-panel");
+      $("guide-deadline-badge").textContent = daysRemaining < 0 ? "OVERDUE by " + Math.abs(daysRemaining) + " days" : daysRemaining + " days remaining";
+      $("guide-deadline-date").textContent = "Deadline: " + formatDate(deadline, "en");
+      $("guide-deadline-bar").style.width = Math.max(0, Math.min(100, progress)) + "%";
+      $("guide-deadline-bar").className = "h-full rounded-full " + (daysRemaining < 0 ? "bg-red-500" : (daysRemaining <= 10 ? "bg-yellow-500" : "bg-green-500"));
+      $("guide-deadline-help").textContent = daysRemaining < 0
+        ? "The statutory response deadline has passed. If the company did not respond, you can use the complaint generator below."
+        : "This calculation uses the longest applicable deadline among the rights you selected.";
+    }
+
+    function refreshComplaintButton() {
+      var companyId = $("guide-company").value;
+      var rawDate = $("guide-complaint-date").value;
+      var name = $("guide-name").value.trim();
+      var email = $("guide-email").value.trim();
+      var canGenerate = Boolean(companyId && rawDate && name && email && trackerState.selectedComplaintRights.length > 0);
+
+      if (canGenerate) {
+        canGenerate = getDaysRemaining(new Date(rawDate + "T00:00:00").toISOString(), trackerState.selectedComplaintRights) < 0;
+      }
+
+      $("guide-generate-complaint").disabled = !canGenerate;
+    }
+
+    renderGuideRights("guide-rights-list", trackerState.selectedRights, "tracker");
+    renderGuideRights("guide-complaint-rights", trackerState.selectedComplaintRights, "complaint");
+
+    $("guide-company").innerHTML += companies.map(function (company) {
+      return "<option value=\"" + escapeHtml(company.id) + "\">" + escapeHtml(company.name) + "</option>";
+    }).join("");
+
+    document.addEventListener("change", function (event) {
+      var target = event.target;
+      if (!target || !target.matches("[data-guide-type]")) {
+        return;
+      }
+
+      var listName = target.getAttribute("data-guide-name");
+      var type = target.getAttribute("data-guide-type");
+      var values = listName === "tracker" ? trackerState.selectedRights : trackerState.selectedComplaintRights;
+
+      if (target.checked) {
+        if (values.indexOf(type) === -1) {
+          values.push(type);
+        }
+      } else if (values.length > 1) {
+        if (listName === "tracker") {
+          trackerState.selectedRights = values.filter(function (value) { return value !== type; });
+        } else {
+          trackerState.selectedComplaintRights = values.filter(function (value) { return value !== type; });
+        }
+      } else {
+        target.checked = true;
+      }
+
+      refreshTracker();
+      refreshComplaintButton();
+    });
+
+    $("guide-sent-date").addEventListener("input", refreshTracker);
+    $("guide-company").addEventListener("change", refreshComplaintButton);
+    $("guide-complaint-date").addEventListener("input", refreshComplaintButton);
+    $("guide-name").addEventListener("input", refreshComplaintButton);
+    $("guide-email").addEventListener("input", refreshComplaintButton);
+
+    $("guide-generate-complaint").addEventListener("click", function () {
+      var company = companies.find(function (item) {
+        return item.id === $("guide-company").value;
+      });
+      var sentDate = new Date($("guide-complaint-date").value + "T00:00:00");
+
+      trackerState.complaintLetter = generateComplaintLetter({
+        senderName: $("guide-name").value.trim(),
+        senderEmail: $("guide-email").value.trim(),
+        company: company,
+        requestTypes: trackerState.selectedComplaintRights.slice()
+      }, sentDate);
+
+      $("guide-complaint-letter").value = trackerState.complaintLetter;
+      $("guide-complaint-output").classList.remove("hidden-panel");
+    });
+
+    $("guide-copy-complaint").addEventListener("click", function () {
+      copyText(trackerState.complaintLetter, $("guide-copy-complaint"), "Copy", "Copied");
+    });
+
+    $("guide-download-complaint").addEventListener("click", function () {
+      downloadText("guide-complaint.txt", trackerState.complaintLetter);
+    });
+
+    refreshTracker();
+    refreshComplaintButton();
+  }
+
+  function initializePage() {
+    renderIndexPage();
+    renderGuidePage();
+  }
+
+  document.addEventListener("DOMContentLoaded", initializePage);
+})();

@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div data-page="resources" class="space-y-10 prose-copy">
+  <section class="space-y-4">
+    <p class="text-sm uppercase tracking-[0.2em] text-muted">Resources</p>
+    <h1 class="text-3xl font-semibold tracking-tight text-ink">Further reading and practical help</h1>
+    <p class="max-w-2xl text-base leading-8 text-muted">
+      optout.fyi covers one piece of a broader privacy strategy. These references can help you remove data from brokers,
+      understand immigrant data rights, and improve your digital security.
+    </p>
+    <p class="max-w-2xl text-sm leading-7 text-muted">
+      This page contains only static links and explanations. No data collection, no accounts, and no user tracking.
+    </p>
+  </section>
+
+  <nav class="section-nav">
+    <a href="#brokers">Data broker opt-outs</a>
+    <a href="#advocacy">Advocacy</a>
+    <a href="#security">Digital security</a>
+    <a href="#why">Why this matters</a>
+  </nav>
+
+  <section id="brokers" class="space-y-4 pt-8">
+    <h2 class="text-xl font-semibold text-ink">Data broker opt-outs</h2>
+    <p class="max-w-2xl leading-8">
+      Guides and registries for removing your personal information from data brokers that sell to law enforcement and immigration agencies.
+    </p>
+    <div class="space-y-3">
+      <a class="flex items-start gap-4 rounded border border-line p-5 transition hover:border-ice" href="https://github.com/yaelwrites/big-ass-data-broker-opt-out-list" target="_blank" rel="noopener noreferrer">
+        <img src="https://www.google.com/s2/favicons?domain=github.com&sz=32" alt="" width="24" height="24" class="mt-0.5 shrink-0 rounded" loading="lazy">
+        <span class="block">
+          <span class="block text-base font-medium text-ink">Big-Ass Data Broker Opt-Out List</span>
+          <span class="mt-2 block leading-8">Community-maintained instructions for opting out of hundreds of data brokers, including many that sell to ICE and law enforcement.</span>
+        </span>
+      </a>
+      <a class="flex items-start gap-4 rounded border border-line p-5 transition hover:border-ice" href="https://cppa.ca.gov/data_broker_registry/" target="_blank" rel="noopener noreferrer">
+        <img src="https://www.google.com/s2/favicons?domain=cppa.ca.gov&sz=32" alt="" width="24" height="24" class="mt-0.5 shrink-0 rounded" loading="lazy">
+        <span class="block">
+          <span class="block text-base font-medium text-ink">California Delete Act data broker registry</span>
+          <span class="mt-2 block leading-8">Official California registry of data brokers. The CPPA now operates the state registry and delete-request system.</span>
+        </span>
+      </a>
+    </div>
+  </section>
+
+  <section id="advocacy" class="space-y-4 border-t border-line pt-10">
+    <h2 class="text-xl font-semibold text-ink">Advocacy and immigrant data rights</h2>
+    <p class="max-w-2xl leading-8">
+      Organizations documenting how commercial data is used in immigration enforcement and fighting surveillance practices.
+    </p>
+    <div class="space-y-3">
+      <a class="flex items-start gap-4 rounded border border-line p-5 transition hover:border-ice" href="https://epic.org/issues/data-protection/immigrant-data/" target="_blank" rel="noopener noreferrer">
+        <img src="https://www.google.com/s2/favicons?domain=epic.org&sz=32" alt="" width="24" height="24" class="mt-0.5 shrink-0 rounded" loading="lazy">
+        <span class="block">
+          <span class="block text-base font-medium text-ink">EPIC - Immigrant Data Rights</span>
+          <span class="mt-2 block leading-8">Research, litigation, and reporting on data brokers, ICE, CBP, and warrantless surveillance.</span>
+        </span>
+      </a>
+      <a class="flex items-start gap-4 rounded border border-line p-5 transition hover:border-ice" href="https://www.nilc.org" target="_blank" rel="noopener noreferrer">
+        <img src="https://www.google.com/s2/favicons?domain=nilc.org&sz=32" alt="" width="24" height="24" class="mt-0.5 shrink-0 rounded" loading="lazy">
+        <span class="block">
+          <span class="block text-base font-medium text-ink">National Immigration Law Center</span>
+          <span class="mt-2 block leading-8">Legal advocacy and know-your-rights materials for low-income immigrant communities.</span>
+        </span>
+      </a>
+      <a class="flex items-start gap-4 rounded border border-line p-5 transition hover:border-ice" href="https://nipnlg.org" target="_blank" rel="noopener noreferrer">
+        <img src="https://www.google.com/s2/favicons?domain=nipnlg.org&sz=32" alt="" width="24" height="24" class="mt-0.5 shrink-0 rounded" loading="lazy">
+        <span class="block">
+          <span class="block text-base font-medium text-ink">National Immigration Project</span>
+          <span class="mt-2 block leading-8">Defense resources and policy advocacy focused on immigration and criminal legal systems.</span>
+        </span>
+      </a>
+      <a class="flex items-start gap-4 rounded border border-line p-5 transition hover:border-ice" href="https://www.aclu.org/issues/immigrants-rights" target="_blank" rel="noopener noreferrer">
+        <img src="https://www.google.com/s2/favicons?domain=aclu.org&sz=32" alt="" width="24" height="24" class="mt-0.5 shrink-0 rounded" loading="lazy">
+        <span class="block">
+          <span class="block text-base font-medium text-ink">ACLU Immigrants' Rights Project</span>
+          <span class="mt-2 block leading-8">Litigation and policy work challenging unconstitutional immigration enforcement practices.</span>
+        </span>
+      </a>
+    </div>
+  </section>
+
+  <section id="security" class="space-y-4 border-t border-line pt-10">
+    <h2 class="text-xl font-semibold text-ink">Digital security links</h2>
+    <p class="max-w-2xl leading-8">
+      Practical guides for higher-risk communities, including immigrants, activists, and journalists.
+    </p>
+    <div class="space-y-3">
+      <a class="flex items-start gap-4 rounded border border-line p-5 transition hover:border-ice" href="https://ssd.eff.org" target="_blank" rel="noopener noreferrer">
+        <img src="https://www.google.com/s2/favicons?domain=eff.org&sz=32" alt="" width="24" height="24" class="mt-0.5 shrink-0 rounded" loading="lazy">
+        <span class="block">
+          <span class="block text-base font-medium text-ink">EFF Surveillance Self-Defense</span>
+          <span class="mt-2 block leading-8">Detailed guides on encrypted messaging, secure browsing, device safety, and threat modeling.</span>
+        </span>
+      </a>
+      <a class="flex items-start gap-4 rounded border border-line p-5 transition hover:border-ice" href="https://www.eff.org" target="_blank" rel="noopener noreferrer">
+        <img src="https://www.google.com/s2/favicons?domain=eff.org&sz=32" alt="" width="24" height="24" class="mt-0.5 shrink-0 rounded" loading="lazy">
+        <span class="block">
+          <span class="block text-base font-medium text-ink">Electronic Frontier Foundation</span>
+          <span class="mt-2 block leading-8">Digital rights research, legal advocacy, and privacy tools.</span>
+        </span>
+      </a>
+      <a class="flex items-start gap-4 rounded border border-line p-5 transition hover:border-ice" href="https://www.accessnow.org/help/" target="_blank" rel="noopener noreferrer">
+        <img src="https://www.google.com/s2/favicons?domain=accessnow.org&sz=32" alt="" width="24" height="24" class="mt-0.5 shrink-0 rounded" loading="lazy">
+        <span class="block">
+          <span class="block text-base font-medium text-ink">Access Now digital security helpline</span>
+          <span class="mt-2 block leading-8">Free digital security support for civil society, activists, and at-risk communities.</span>
+        </span>
+      </a>
+    </div>
+  </section>
+
+  <section id="why" class="space-y-4 border-t border-line pt-10">
+    <h2 class="text-xl font-semibold text-ink">Why this matters</h2>
+    <p class="max-w-2xl leading-8">
+      AI surveillance companies collect data from public records, social media, cell phone location pings,
+      license plate readers, utility records, and many other sources. That data can be packaged into products
+      used to locate, profile, and target immigrants.
+    </p>
+    <p class="max-w-2xl leading-8">
+      Exercising your privacy rights is one step. Opting out of data brokers, securing communications,
+      and understanding your digital footprint are part of the same broader defense.
+    </p>
+    <p class="max-w-2xl text-sm leading-7 text-muted">
+      optout.fyi does not endorse or verify every third-party site listed here. Review those organizations and decide what is appropriate for your situation.
+    </p>
+  </section>
+
+  <section class="space-y-4 border-t border-line pt-10">
+    <h2 class="text-xl font-semibold text-ink">About this tool</h2>
+    <p class="max-w-2xl leading-8 text-muted">
+      optout.fyi generates template letters based on published California statutes (CCPA/CPRA).
+      It is not legal advice and does not create an attorney-client relationship. For legal or
+      immigration help, contact
+      <a class="underline hover:text-ice" href="https://www.nilc.org" target="_blank" rel="noopener noreferrer">NILC</a>,
+      <a class="underline hover:text-ice" href="https://www.aclu.org/issues/immigrants-rights" target="_blank" rel="noopener noreferrer">ACLU</a>, or
+      <a class="underline hover:text-ice" href="https://www.eff.org" target="_blank" rel="noopener noreferrer">EFF</a>.
+    </p>
+    <p class="text-sm leading-7 text-muted">
+      Inspired by the <a class="underline hover:text-ice" href="https://www.ilrc.org/redcards" target="_blank" rel="noopener noreferrer">ILRC Red Cards</a> — know your rights, assert your rights.
+    </p>
+  </section>
+</div>
+{% endblock %}
