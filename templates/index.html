@@ -8,15 +8,6 @@
     min-height: calc(100vh - 10rem);
   }
 
-  #index-experience::before {
-    content: "";
-    position: fixed;
-    inset: 4.5rem 0 0;
-    pointer-events: none;
-    background: linear-gradient(180deg, rgba(74, 138, 184, 0.05), transparent 18rem);
-    opacity: 0.55;
-  }
-
   #red-card-shell {
     position: fixed;
     top: 50%;
@@ -169,25 +160,14 @@
 
   .company-group-grid {
     display: grid;
-    gap: 0.75rem;
+    gap: 1rem;
     grid-template-columns: repeat(1, minmax(0, 1fr));
   }
 
   .company-card {
-    display: flex;
-    min-height: 100%;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 0.9rem;
-    padding: 1rem;
-  }
-
-  .company-card-label {
-    display: flex;
-    min-width: 0;
-    align-items: flex-start;
-    gap: 0.75rem;
-    cursor: pointer;
+    display: grid;
+    gap: 0.85rem;
+    padding: 1rem 1.05rem;
   }
 
   .company-card-meta {
@@ -200,12 +180,44 @@
   .company-card-name {
     display: block;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    font-size: 1rem;
+    line-height: 1.4;
+    white-space: normal;
+  }
+
+  .company-card-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+  }
+
+  .company-card-checkbox {
+    margin-top: 0.45rem;
+    height: 1.1rem;
+    width: 1.1rem;
+    flex-shrink: 0;
   }
 
   .company-card-trigger {
-    align-self: flex-start;
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    align-items: center;
+    gap: 0.85rem;
+    border-radius: 0.85rem;
+    padding: 0.15rem;
+    text-align: left;
+  }
+
+  .company-card-trigger:focus-visible {
+    outline-offset: 3px;
+  }
+
+  .company-card-logo {
+    height: 2rem;
+    width: 2rem;
+    flex-shrink: 0;
+    border-radius: 0.45rem;
   }
 
   .company-reference-mark {
@@ -345,6 +357,28 @@
     opacity: 0.6;
   }
 
+  .rights-tooltip-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(74, 138, 184, 0.3);
+    background: rgba(74, 138, 184, 0.08);
+    padding: 0.7rem 1rem;
+    font-size: 0.84rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #c8dce8;
+  }
+
+  .rights-tooltip-trigger span:last-child {
+    color: #8ba3b9;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
   @media (hover: none) {
     .company-reference-tooltip {
       width: min(20rem, calc(100vw - 1.25rem));
@@ -357,7 +391,7 @@
     }
   }
 
-  @media (min-width: 1200px) {
+  @media (min-width: 1024px) {
     .company-group-grid {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
@@ -592,14 +626,12 @@
     </section>
 
     <section id="generator" class="hidden-panel space-y-10 border-t border-line pt-10">
-      <details id="rights-explainer" class="plain-language-details rounded-2xl border border-line bg-page/35 p-5">
-        <summary class="flex items-center justify-between gap-3 text-left font-semibold text-ink">
+      <div class="flex items-center justify-end">
+        <button id="rights-reference-trigger" type="button" class="rights-tooltip-trigger" aria-expanded="false">
           <span id="plain-rights-title">What are my rights?</span>
-          <span class="rounded-full border border-line px-3 py-1 text-[0.7rem] uppercase tracking-[0.16em] text-muted">CCPA / CPRA</span>
-        </summary>
-        <p id="plain-rights-copy" class="mt-4 max-w-3xl text-sm leading-7 text-muted">The CCPA/CPRA gives California residents the right to know what personal data companies collect, ask for deletion, and opt out of data sales or sharing. You do not need to be a citizen. If your data was collected in California, these rights apply to you. Companies generally have 45 days to respond.</p>
-      </details>
-
+          <span>CCPA / CPRA</span>
+        </button>
+      </div>
       <nav class="section-nav" id="generator-nav" aria-label="Form progress">
         <a href="#step-companies" data-step-nav="companies" class="section-nav-step">
           <span class="section-nav-badge" data-step-badge>1</span>
