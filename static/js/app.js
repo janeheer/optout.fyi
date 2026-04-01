@@ -311,17 +311,17 @@
       }).map(function (company) {
         var logoUrl = "https://www.google.com/s2/favicons?domain=" + encodeURIComponent(company.domain || "") + "&sz=32";
         return (
-          "<div class=\"company-reference-item rounded-2xl border border-line bg-page/30 px-4 py-3\" data-company-item=\"" + escapeHtml(company.id) + "\">" +
-            "<div class=\"flex items-center gap-3\">" +
-              "<label class=\"flex min-w-0 flex-1 cursor-pointer items-center gap-3\">" +
-                "<input data-company-id=\"" + escapeHtml(company.id) + "\" type=\"checkbox\" class=\"h-4 w-4 shrink-0\">" +
+          "<div class=\"company-reference-item company-card rounded-2xl border border-line bg-page/30\" data-company-item=\"" + escapeHtml(company.id) + "\">" +
+            "<label class=\"company-card-label\">" +
+              "<input data-company-id=\"" + escapeHtml(company.id) + "\" type=\"checkbox\" class=\"mt-1 h-4 w-4 shrink-0\">" +
+              "<span class=\"company-card-meta\">" +
                 "<img src=\"" + logoUrl + "\" alt=\"\" width=\"24\" height=\"24\" class=\"shrink-0 rounded\" loading=\"lazy\">" +
-                "<span class=\"truncate text-sm font-medium text-ink\">" + escapeHtml(company.name) + "</span>" +
-              "</label>" +
-              "<button type=\"button\" data-company-trigger=\"" + escapeHtml(company.id) + "\" aria-expanded=\"false\" class=\"company-reference-trigger shrink-0 rounded-full border border-line bg-white/5 px-2 py-1 text-[0.7rem] font-semibold text-ink/85\">" +
-                "<span class=\"company-reference-mark\">" + escapeHtml(translations[lang].companyReferences) + "</span>" +
-              "</button>" +
-            "</div>" +
+                "<span class=\"company-card-name text-sm font-medium text-ink\">" + escapeHtml(company.name) + "</span>" +
+              "</span>" +
+            "</label>" +
+            "<button type=\"button\" data-company-trigger=\"" + escapeHtml(company.id) + "\" aria-expanded=\"false\" class=\"company-reference-trigger company-card-trigger shrink-0 rounded-full border border-line bg-white/5 px-3 py-2 text-[0.7rem] font-semibold text-ink/85\">" +
+              "<span class=\"company-reference-mark\">" + escapeHtml(translations[lang].companyReferences) + "</span>" +
+            "</button>" +
           "</div>"
         );
       }).join("");
@@ -329,7 +329,7 @@
       return (
         "<div class=\"space-y-3\">" +
           "<h3 class=\"text-xs uppercase tracking-[0.2em] text-muted\">" + escapeHtml(labels[category]) + "</h3>" +
-          "<div class=\"space-y-3\">" + items + "</div>" +
+          "<div class=\"company-group-grid\">" + items + "</div>" +
         "</div>"
       );
     }).join("");
@@ -373,8 +373,15 @@
       sentRecord: getSentRecord(),
       overdueCompanyIds: [],
       activeTooltipId: null,
-      pinnedTooltipId: null
+      pinnedTooltipId: null,
+      activeStepKey: "companies"
     };
+    var stepOrder = [
+      { key: "companies", id: "step-companies" },
+      { key: "rights", id: "step-rights" },
+      { key: "info", id: "step-info" },
+      { key: "generate", id: "step-generate" }
+    ];
 
     function clearDockTimer() {
       if (dockTimer !== null) {
@@ -533,6 +540,136 @@
       return translations[state.lang || "en"];
     }
 
+    function prefersReducedMotion() {
+      return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    }
+
+    function hasIdentityInfo() {
+      return Boolean($("sender-name").value.trim() && $("sender-email").value.trim());
+    }
+
+    function isStepComplete(stepKey) {
+      if (stepKey === "companies") {
+        return state.selectedCompanyIds.length > 0;
+      }
+      if (stepKey === "rights") {
+        return state.selectedRights.length > 0;
+      }
+      if (stepKey === "info") {
+        return hasIdentityInfo();
+      }
+      if (stepKey === "generate") {
+        return Boolean(state.generatedLetter);
+      }
+      return false;
+    }
+
+    function updateStepNav() {
+      var copy = text();
+      var labels = {
+        companies: copy.stepCompanies,
+        rights: copy.stepRights,
+        info: copy.stepInfo,
+        generate: copy.stepGenerate
+      };
+
+      document.querySelectorAll("[data-step-nav]").forEach(function (link, index) {
+        var stepKey = link.getAttribute("data-step-nav");
+        var active = state.activeStepKey === stepKey;
+        var complete = isStepComplete(stepKey);
+        var badge = link.querySelector("[data-step-badge]");
+        var label = link.querySelector("[data-step-label]");
+        var status = link.querySelector("[data-step-status]");
+
+        link.classList.toggle("is-current", active);
+        link.classList.toggle("is-complete", !active && complete);
+        link.setAttribute("aria-current", active ? "step" : "false");
+
+        if (badge) {
+          badge.textContent = (!active && complete) ? "\u2713" : String(index + 1);
+        }
+
+        if (label && labels[stepKey]) {
+          label.textContent = labels[stepKey];
+        }
+
+        if (status) {
+          if (active) {
+            status.textContent = copy.stepCurrent;
+            status.hidden = false;
+          } else if (complete) {
+            status.textContent = copy.stepDone;
+            status.hidden = false;
+          } else {
+            status.textContent = "";
+            status.hidden = true;
+          }
+        }
+      });
+    }
+
+    function updateActiveStepFromScroll() {
+      if ($("generator").classList.contains("hidden-panel")) {
+        state.activeStepKey = "companies";
+        updateStepNav();
+        return;
+      }
+
+      var offset = window.innerWidth >= 1024 ? 160 : 220;
+      var currentKey = stepOrder[0].key;
+
+      stepOrder.forEach(function (step) {
+        var section = $(step.id);
+        if (section && section.getBoundingClientRect().top <= offset) {
+          currentKey = step.key;
+        }
+      });
+
+      state.activeStepKey = currentKey;
+      updateStepNav();
+    }
+
+    function revealGenerator() {
+      setVisible("how-it-works-panel", true);
+      setVisible("generator", true);
+
+      window.requestAnimationFrame(function () {
+        $("how-it-works-panel").scrollIntoView({
+          behavior: prefersReducedMotion() ? "auto" : "smooth",
+          block: "start"
+        });
+        updateActiveStepFromScroll();
+      });
+    }
+
+    function syncEmailLinks() {
+      var copy = text();
+      var selected = selectedCompanies();
+      var payload = {
+        senderName: $("sender-name").value.trim(),
+        senderEmail: $("sender-email").value.trim(),
+        companies: selected,
+        requestTypes: state.selectedRights.slice()
+      };
+      var mailtoUrl = payload.senderName && payload.senderEmail && selected.length > 0
+        ? buildMailtoUrl(payload)
+        : "";
+
+      [
+        { element: $("open-email"), enabledLabel: copy.openEmail },
+        { element: $("send-email-link"), enabledLabel: copy.sendEmailAction }
+      ].forEach(function (entry) {
+        if (!entry.element) {
+          return;
+        }
+
+        entry.element.href = mailtoUrl || "#";
+        entry.element.textContent = mailtoUrl ? entry.enabledLabel : copy.noEmail;
+        entry.element.setAttribute("aria-disabled", mailtoUrl ? "false" : "true");
+        entry.element.classList.toggle("is-disabled-link", !mailtoUrl);
+      });
+    }
+
     function syncGenerateButton() {
       var copy = text();
       var name = $("sender-name").value.trim();
@@ -540,6 +677,8 @@
       var canGenerate = state.selectedCompanyIds.length > 0 && state.selectedRights.length > 0 && name && email;
       $("generate-letter").disabled = !canGenerate;
       $("generate-letter").textContent = copy.generate + (state.selectedCompanyIds.length ? " " + copy.forGenerating + " " + state.selectedCompanyIds.length : "");
+      syncEmailLinks();
+      updateStepNav();
     }
 
     function syncStartCountdownButton() {
@@ -668,6 +807,7 @@
       clearDockTimer();
       hideTooltip();
       setVisible("explanation-panel", false);
+      setVisible("how-it-works-panel", false);
       setVisible("generator", false);
       setVisible("letter-output", false);
 
@@ -760,14 +900,25 @@
       }
 
       var copy = text();
+      $("red-card-kicker").textContent = copy.cardLabel;
       $("red-card-tagline").textContent = copy.tagline;
       $("red-card-subtitle").textContent = copy.cardIntroSubtitle || copy.subtitle;
+      $("red-card-compact-subtitle").textContent = copy.cardLabel;
+      $("compact-language-label").textContent = copy.compactLanguageLabel;
       $("hero-title").textContent = copy.tagline;
       $("hero-subtitle").textContent = copy.subtitle;
+      $("open-source-label").textContent = copy.openSourceLabel;
       $("what-is-title").textContent = copy.whatIsTitle;
       $("what-is-copy").textContent = copy.whatIs;
       $("how-title").textContent = copy.howTitle;
       $("how-copy").textContent = copy.how;
+      $("how-it-works-title").textContent = copy.howTitle;
+      $("how-step-1-title").textContent = copy.howStep1Title;
+      $("how-step-1-copy").textContent = copy.howStep1Copy;
+      $("how-step-2-title").textContent = copy.howStep2Title;
+      $("how-step-2-copy").textContent = copy.howStep2Copy;
+      $("how-step-3-title").textContent = copy.howStep3Title;
+      $("how-step-3-copy").textContent = copy.howStep3Copy;
       $("what-not-title").textContent = copy.whatNotTitle;
       $("what-not-list").innerHTML = [copy.whatNot1, copy.whatNot2, copy.whatNot3, copy.whatNot4].map(function (item) {
         return "<li>" + escapeHtml(item) + "</li>";
@@ -775,6 +926,8 @@
       $("who-title").textContent = copy.whoTitle;
       $("who-copy").textContent = copy.who;
       $("legal-disclaimer-top").textContent = copy.legalDisclaimer;
+      $("plain-rights-title").textContent = copy.rightsPlainTitle;
+      $("plain-rights-copy").textContent = copy.rightsPlainCopy;
       $("companies-heading").textContent = copy.selectCompanies;
       $("select-all-companies").textContent = copy.selectAll + " (" + companies.length + ")";
       $("rights-heading").textContent = copy.yourRights;
@@ -784,13 +937,24 @@
       $("name-label").textContent = copy.fullName;
       $("email-label").textContent = copy.email;
       $("letter-heading").textContent = copy.yourLetter;
+      $("review-note").textContent = copy.reviewNote;
       $("subject-label").textContent = copy.emailSubject + ": ";
       $("email-subject").textContent = BATCH_EMAIL_SUBJECT;
       $("bcc-label").textContent = copy.emailBcc + ": ";
       $("bcc-explain").textContent = copy.bccExplain;
       $("copy-letter").textContent = copy.copy;
       $("download-letter").textContent = copy.download;
-      $("open-email").textContent = copy.openEmail;
+      $("send-it-step-label").textContent = copy.sendItStep;
+      $("send-it-title").textContent = copy.sendItTitle;
+      $("send-it-intro").textContent = copy.sendItIntro;
+      $("send-email-title").textContent = copy.sendEmailTitle;
+      $("send-email-copy").textContent = copy.sendEmailCopy;
+      $("send-print-title").textContent = copy.sendPrintTitle;
+      $("send-print-copy").textContent = copy.sendPrintCopy;
+      $("send-complaint-title").textContent = copy.sendComplaintTitle;
+      $("send-complaint-copy").textContent = copy.sendComplaintCopy;
+      $("send-cppa-label").textContent = copy.sendComplaintCPPA;
+      $("send-ag-label").textContent = copy.sendComplaintAG;
       $("sent-label").textContent = copy.iSentIt;
       $("sent-description").textContent = copy.iSentItDesc;
       $("start-countdown").textContent = copy.startCountdown;
@@ -801,27 +965,11 @@
       $("get-started").textContent = copy.getStarted;
       updateLanguageButtons();
 
-      // Section nav translations
-      var navEl = $("generator-nav");
-      if (navEl) {
-        var navLinks = navEl.querySelectorAll("a");
-        var navLabels = state.lang === "es"
-          ? ["Empresas", "Derechos", "Tu info", "Generar"]
-          : ["Companies", "Rights", "Your info", "Generate"];
-        navLinks.forEach(function (link, i) { if (navLabels[i]) link.textContent = navLabels[i]; });
-      }
-
-      // Letter review text
-      var reviewP = document.querySelector("#letter-output > div > p");
-      if (reviewP) {
-        reviewP.textContent = state.lang === "es"
-          ? "Revisa el borrador. C\u00f3pialo, desc\u00e1rgalo o \u00e1brelo en tu app de email."
-          : "Review the draft below. Copy it, download it, or open it in your email app.";
-      }
-
       renderCompanyInputs();
       renderRightsInputs();
       syncGenerateButton();
+      syncEmailLinks();
+      updateStepNav();
       renderCountdown();
     }
 
@@ -843,7 +991,7 @@
       state.generatedLetter = generateBatchLetter(payload);
       $("generated-letter").value = state.generatedLetter;
       $("bcc-emails").textContent = getBatchRecipientEmails(selected).join(", ");
-      $("open-email").href = buildMailtoUrl(payload) || "#";
+      syncEmailLinks();
 
       if (portalOnly.length > 0) {
         $("no-email-warning").innerHTML = escapeHtml(copy.noEmailWarning) + " " + portalOnly.map(function (company) {
@@ -860,6 +1008,7 @@
       setVisible("letter-output", true);
       $("confirm-sent").checked = false;
       syncStartCountdownButton();
+      updateStepNav();
     }
 
     function resetState() {
@@ -886,7 +1035,9 @@
       setVisible("countdown-panel", false);
       setVisible("overdue-panel", false);
       setVisible("explanation-panel", true);
+      setVisible("how-it-works-panel", false);
       setVisible("generator", false);
+      state.activeStepKey = "companies";
       setFlowState("docked");
       renderTexts();
     }
@@ -912,8 +1063,10 @@
 
       if (firstSelection || root.getAttribute("data-flow-state") === "picker" || root.getAttribute("data-flow-state") === "holding") {
         setVisible("explanation-panel", true);
+        setVisible("how-it-works-panel", false);
         setVisible("generator", false);
         setVisible("letter-output", false);
+        state.activeStepKey = "companies";
         startDockSequence();
         return;
       }
@@ -927,10 +1080,7 @@
     $("lang-toggle-en").addEventListener("click", function () { setLang("en", { skipDockAnimation: true }); });
     $("lang-toggle-es").addEventListener("click", function () { setLang("es", { skipDockAnimation: true }); });
 
-    $("get-started").addEventListener("click", function () {
-      setVisible("explanation-panel", false);
-      setVisible("generator", true);
-    });
+    $("get-started").addEventListener("click", revealGenerator);
 
     $("select-all-companies").addEventListener("click", function () {
       state.selectedCompanyIds = companies.map(function (company) {
@@ -944,6 +1094,12 @@
     $("sender-email").addEventListener("input", syncGenerateButton);
     $("generate-letter").addEventListener("click", generateLetter);
     $("confirm-sent").addEventListener("change", syncStartCountdownButton);
+    document.querySelectorAll("[data-step-nav]").forEach(function (link) {
+      link.addEventListener("click", function () {
+        state.activeStepKey = link.getAttribute("data-step-nav") || "companies";
+        updateStepNav();
+      });
+    });
 
     $("start-countdown").addEventListener("click", function () {
       markAsSent(state.selectedCompanyIds.slice(), state.selectedRights.slice());
@@ -1001,11 +1157,13 @@
     });
     window.addEventListener("resize", function () {
       hideTooltip();
+      updateActiveStepFromScroll();
     });
     window.addEventListener("scroll", function () {
       if (state.pinnedTooltipId) {
         hideTooltip();
       }
+      updateActiveStepFromScroll();
     }, true);
 
     // Restore saved language — only auto-advance if there's an active countdown

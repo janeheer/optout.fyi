@@ -21,7 +21,7 @@
           colors: {
             page: "#0c1220",
             ink: "#c8dce8",
-            muted: "#6b8aaa",
+            muted: "#8ba3b9",
             panel: "#162032",
             line: "#1e3048",
             card: "#b91c1c",
@@ -47,7 +47,7 @@
 
     .prose-copy p,
     .prose-copy li {
-      color: #6b8aaa;
+      color: #8ba3b9;
     }
 
     .prose-copy strong {
@@ -60,6 +60,13 @@
 
     input[type="checkbox"] {
       accent-color: #4a8ab8;
+    }
+
+    button,
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    summary {
+      min-height: 44px;
     }
 
     ::selection {
@@ -85,9 +92,10 @@
       border-radius: 9999px;
       font-size: 0.8rem;
       font-weight: 500;
-      color: #6b8aaa;
+      color: #8ba3b9;
       border: 1px solid #1e3048;
       transition: all 0.15s;
+      min-height: 44px;
     }
     .section-nav a:hover {
       color: #c8dce8;
