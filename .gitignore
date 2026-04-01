@@ -22,3 +22,5 @@ docs/
 
 # vercel
 .vercel
+node_modules/
+.next/
