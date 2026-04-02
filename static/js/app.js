@@ -1352,6 +1352,7 @@
       clearDockTimer();
       hideTooltip();
       clearSentRecord();
+      document.documentElement.classList.remove("has-active-countdown");
       state.sentRecord = null;
       state.generatedLetter = "";
       state.complaintLetter = "";
@@ -1541,10 +1542,8 @@
     var savedLang = null;
     try { savedLang = localStorage.getItem("optout_lang"); } catch (_e) {}
     if (state.sentRecord) {
-      // Active countdown — play email animation then show countdown
-      playEmailAnimation(function () {
-        setLang(savedLang === "es" ? "es" : "en", { skipDockAnimation: true });
-      });
+      // Active countdown — skip straight to countdown, no animation on reload
+      setLang(savedLang === "es" ? "es" : "en", { skipDockAnimation: true });
       return;
     }
     setFlowState("picker");

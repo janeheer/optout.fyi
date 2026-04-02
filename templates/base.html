@@ -251,6 +251,22 @@
     }
   </style>
   {% block head %}{% endblock %}
+  <script>
+    // Prevent header/footer flash on reload when countdown is active
+    try {
+      if (JSON.parse(localStorage.getItem("optout_sent") || "null")) {
+        document.documentElement.classList.add("has-active-countdown");
+      }
+    } catch (_e) {}
+  </script>
+  <style>
+    .has-active-countdown header,
+    .has-active-countdown footer,
+    .has-active-countdown .h-1,
+    .has-active-countdown .mobile-bottom-nav {
+      display: none !important;
+    }
+  </style>
 </head>
 <body class="min-h-screen font-sans antialiased">
   <a
