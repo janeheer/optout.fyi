@@ -109,14 +109,41 @@
   .countdown-companies-panel {
     position: fixed;
     z-index: 31;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 1.25rem 1.5rem calc(env(safe-area-inset-bottom, 0px) + 1.25rem);
+    overflow-y: auto;
   }
 
   #index-experience[data-flow-state="countdown"] ~ .countdown-companies-panel {
     display: block;
+  }
+
+  /* Default (narrow): below the card, scrollable */
+  .countdown-companies-panel {
+    top: calc(50% + min(18rem, calc(50vh - 3rem)) + 1rem);
+    left: 1rem;
+    right: 1rem;
+    bottom: 0;
+    padding: 0.75rem 1rem calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
+  }
+
+  /* Wide desktop: right side of the card */
+  @media (min-width: 1200px) {
+    .countdown-companies-panel {
+      top: 50%;
+      left: calc(50% + 24.5rem);
+      right: 1.5rem;
+      bottom: auto;
+      max-height: calc(100vh - 6rem);
+      transform: translateY(-50%);
+      padding: 1rem;
+    }
+
+    .countdown-companies-panel > div {
+      text-align: left;
+    }
+
+    .countdown-companies-panel .flex-wrap {
+      justify-content: flex-start;
+    }
   }
 
   /* Email send animation overlay */
@@ -259,13 +286,20 @@
   #index-experience[data-flow-state="countdown"] #red-card-shell {
     top: 50%;
     left: 50%;
-    width: min(46rem, calc(100vw - 6rem));
-    height: min(36rem, calc(100vh - 6rem));
+    width: min(46rem, calc(100vw - 3rem));
+    height: min(28rem, calc(50vh));
     min-height: 0;
     border-radius: 2rem;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -55%);
     box-shadow: none;
     overflow: hidden;
+  }
+
+  @media (min-width: 1200px) {
+    #index-experience[data-flow-state="countdown"] #red-card-shell {
+      height: min(36rem, calc(100vh - 6rem));
+      transform: translate(-50%, -50%);
+    }
   }
 
   #index-experience[data-flow-state="countdown"] #red-card-countdown {
