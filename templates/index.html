@@ -146,15 +146,15 @@
     padding-top: 14.75rem;
   }
 
-  #index-experience[data-flow-state="countdown"] #app-shell {
-    padding-top: 0;
-  }
-
-  /* Hide chrome in countdown mode */
-  #index-experience[data-flow-state="countdown"] ~ footer,
+  /* Hide everything except the card in countdown mode */
   body:has(#index-experience[data-flow-state="countdown"]) header,
+  body:has(#index-experience[data-flow-state="countdown"]) footer,
   body:has(#index-experience[data-flow-state="countdown"]) .h-1,
   body:has(#index-experience[data-flow-state="countdown"]) .mobile-bottom-nav {
+    display: none !important;
+  }
+
+  #index-experience[data-flow-state="countdown"] #app-shell {
     display: none !important;
   }
 
@@ -175,13 +175,12 @@
   }
 
   #index-experience[data-flow-state="countdown"] #red-card-shell {
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    min-height: 100vh;
-    border-radius: 0;
-    transform: none;
+    top: 50%;
+    left: 50%;
+    width: min(52rem, calc(100vw - 3rem));
+    min-height: min(42rem, calc(100vh - 4rem));
+    border-radius: 2rem;
+    transform: translate(-50%, -50%);
     box-shadow: none;
   }
 
@@ -557,13 +556,12 @@
 
     #index-experience[data-flow-state="countdown"] #red-card-shell {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      min-height: 100vh;
-      border-radius: 0;
-      transform: none;
+      top: 50%;
+      left: 50%;
+      width: calc(100vw - 1.5rem);
+      min-height: calc(100vh - 3rem);
+      border-radius: 1.5rem;
+      transform: translate(-50%, -50%);
       box-shadow: none;
       z-index: 50;
     }
