@@ -1082,6 +1082,7 @@
         clearLiveRegion("countdown-live-region");
         clearLiveRegion("countdown-alert-live-region");
         setVisible("countdown-panel", false);
+        setVisible("countdown-companies-panel", false);
         setVisible("overdue-panel", false);
         if (!state.lang) {
           setFlowState("picker");
@@ -1108,6 +1109,7 @@
         var overdueAnnouncementKey = "overdue:" + Math.abs(daysLeft) + ":" + state.lang;
 
         setVisible("countdown-panel", false);
+        setVisible("countdown-companies-panel", false);
         setVisible("overdue-panel", true);
         setFlowState("overdue");
         $("times-up-title").textContent = copy.timesUp;
@@ -1180,9 +1182,10 @@
         ? "Las siguientes empresas han recibido su solicitud de derechos de privacidad bajo CCPA/CPRA y est\u00e1n legalmente obligadas a responder dentro del plazo indicado. El incumplimiento constituye una violaci\u00f3n sujeta a multas de hasta $7,500 por infracci\u00f3n."
         : "The following companies have been served your CCPA/CPRA privacy rights request and are legally obligated to respond within the deadline above. Failure to comply constitutes a violation subject to penalties of up to $7,500 per infraction.";
       $("start-over-inline").textContent = copy.startOver;
+      setVisible("countdown-companies-panel", true);
       $("notified-company-list-inline").innerHTML = notifiedCompanies.map(function (company) {
         var logoUrl = "https://www.google.com/s2/favicons?domain=" + encodeURIComponent(company.domain || "") + "&sz=32";
-        return "<span class=\"inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold text-white/80\">" +
+        return "<span class=\"inline-flex items-center gap-2 rounded-full border border-line bg-panel/60 px-3 py-2 text-xs font-semibold text-ink\">" +
           "<img src=\"" + logoUrl + "\" alt=\"\" width=\"16\" height=\"16\" class=\"shrink-0 rounded\" loading=\"lazy\">" +
           escapeHtml(company.name) + "</span>";
       }).join("");
@@ -1333,6 +1336,7 @@
       setVisible("letter-summary-panel", false);
       setVisible("complaint-output", false);
       setVisible("countdown-panel", false);
+      setVisible("countdown-companies-panel", false);
       setVisible("overdue-panel", false);
       clearLiveRegion("letter-live-region");
       clearLiveRegion("countdown-live-region");
