@@ -1167,23 +1167,22 @@
       var countdownAnnouncementKey = "active:" + daysLeft + ":" + deadlineDate.toISOString().slice(0, 10) + ":" + state.lang;
 
       setVisible("overdue-panel", false);
-      setVisible("countdown-panel", true);
+      setVisible("countdown-panel", false);
       setFlowState("countdown");
       $("countdown-status").textContent = state.lang === "es" ? "PLAZO LEGAL EN CURSO" : "LEGAL DEADLINE ACTIVE";
       $("countdown-number").textContent = String(daysLeft);
       $("countdown-copy").textContent = daysLeft === 1 ? copy.dayLeft : copy.daysLeft;
       $("countdown-dates").textContent = copy.sentOn + " " + formatDate(sentDate, state.lang) + " · " + copy.deadline + " " + formatDate(deadlineDate, state.lang);
-      $("companies-notified").textContent = state.lang === "es"
+      $("companies-notified-inline").textContent = state.lang === "es"
         ? "EMPRESAS LEGALMENTE OBLIGADAS A RESPONDER"
         : "COMPANIES LEGALLY OBLIGATED TO RESPOND";
-      $("countdown-legal-notice").textContent = state.lang === "es"
+      $("countdown-legal-notice-inline").textContent = state.lang === "es"
         ? "Las siguientes empresas han recibido su solicitud de derechos de privacidad bajo CCPA/CPRA y est\u00e1n legalmente obligadas a responder dentro del plazo indicado. El incumplimiento constituye una violaci\u00f3n sujeta a multas de hasta $7,500 por infracci\u00f3n."
         : "The following companies have been served your CCPA/CPRA privacy rights request and are legally obligated to respond within the deadline above. Failure to comply constitutes a violation subject to penalties of up to $7,500 per infraction.";
-      $("countdown-note").textContent = copy.countdownNote;
-      $("start-over").textContent = copy.startOver;
-      $("notified-company-list").innerHTML = notifiedCompanies.map(function (company) {
+      $("start-over-inline").textContent = copy.startOver;
+      $("notified-company-list-inline").innerHTML = notifiedCompanies.map(function (company) {
         var logoUrl = "https://www.google.com/s2/favicons?domain=" + encodeURIComponent(company.domain || "") + "&sz=32";
-        return "<span class=\"inline-flex items-center gap-2 rounded border border-red-600/30 bg-red-600/5 px-3 py-2 text-sm font-medium text-ink\">" +
+        return "<span class=\"inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold text-white/80\">" +
           "<img src=\"" + logoUrl + "\" alt=\"\" width=\"16\" height=\"16\" class=\"shrink-0 rounded\" loading=\"lazy\">" +
           escapeHtml(company.name) + "</span>";
       }).join("");
@@ -1470,6 +1469,7 @@
     $("overdue-name").addEventListener("input", updateOverdueButton);
     $("overdue-email").addEventListener("input", updateOverdueButton);
     $("start-over").addEventListener("click", confirmResetState);
+    $("start-over-inline").addEventListener("click", confirmResetState);
     $("start-over-overdue").addEventListener("click", confirmResetState);
     document.addEventListener("click", function (event) {
       if (!event.target.closest("[data-company-item]") &&
