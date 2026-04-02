@@ -81,6 +81,15 @@
     height: 100%;
   }
 
+  .countdown-brand {
+    position: absolute;
+    top: 1.25rem;
+    left: 0;
+    right: 0;
+    text-align: center;
+    pointer-events: none;
+  }
+
   .countdown-hero {
     flex: 1 1 auto;
     display: flex;
@@ -824,6 +833,7 @@
 
       <div id="red-card-countdown" class="red-card-face">
         <div class="red-card-face-inner countdown-fullscreen-inner">
+          <p class="countdown-brand text-xs font-bold uppercase tracking-[0.3em] text-white/30">optout.fyi</p>
           <div class="countdown-hero text-center">
             <p id="countdown-status" class="text-xs font-bold uppercase tracking-[0.3em] text-white/55"></p>
             <p id="countdown-number" class="countdown-big-number text-white"></p>
