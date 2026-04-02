@@ -1504,9 +1504,6 @@
     var shareUrl = "https://optout.fyi";
     var shareText = "I just exercised my CCPA/CPRA data privacy rights against AI surveillance companies. You can too:";
 
-    $("share-x").addEventListener("click", function () {
-      window.open("https://x.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl), "_blank");
-    });
     $("share-fb").addEventListener("click", function () {
       window.open("https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(shareUrl), "_blank");
     });
