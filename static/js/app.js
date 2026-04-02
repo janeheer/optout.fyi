@@ -1542,7 +1542,16 @@
     var savedLang = null;
     try { savedLang = localStorage.getItem("optout_lang"); } catch (_e) {}
     if (state.sentRecord) {
-      // Active countdown — skip straight to countdown, no animation on reload
+      // Active countdown — slow card fade-in on reload
+      var shell = $("red-card-shell");
+      if (shell) {
+        shell.style.opacity = "0";
+        shell.classList.add("card-reload");
+        window.setTimeout(function () {
+          shell.style.opacity = "";
+          shell.classList.remove("card-reload");
+        }, 2000);
+      }
       setLang(savedLang === "es" ? "es" : "en", { skipDockAnimation: true });
       return;
     }

@@ -154,6 +154,21 @@
     animation: card-grow 2.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
+  @keyframes card-fade-in {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.92);
+    }
+    100% {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+
+  #red-card-shell.card-reload {
+    animation: card-fade-in 1.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
   .card-lang-button,
   .compact-lang-button,
   .company-reference-trigger {
