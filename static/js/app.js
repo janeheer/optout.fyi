@@ -317,16 +317,6 @@
       "&body=" + encodeURIComponent(generateBatchLetter(payload));
   }
 
-  function buildCurrentLetterPayload() {
-    return {
-      senderName: $("sender-name").value.trim(),
-      senderEmail: $("sender-email").value.trim(),
-      companies: selectedCompanies(),
-      requestTypes: state.selectedRights.slice(),
-      lang: state.lang
-    };
-  }
-
   function buildLetterSummaryHtml(payload) {
     var rightsHtml;
     var companyNames;
@@ -353,35 +343,6 @@
       "<p>Tambien te identifica con el nombre " + escapeHtml(payload.senderName || "que escribiste") + " y el correo " + escapeHtml(payload.senderEmail || "que escribiste") + " para verificar la solicitud.</p>" +
       "<p>" + escapeHtml(deadlineText) + "</p>" +
       "<p>Si la empresa no responde, la carta dice que podras presentar una queja ante la CPPA y la Fiscalia General de California.</p>";
-  }
-
-  function syncLetterSummaryOutput() {
-    var payload;
-
-    if (!state.generatedLetter || state.lang !== "es") {
-      $("letter-summary-body").innerHTML = "";
-      setVisible("letter-summary-panel", false);
-      return;
-    }
-
-    payload = buildCurrentLetterPayload();
-    $("letter-summary-body").innerHTML = buildLetterSummaryHtml(payload);
-    setVisible("letter-summary-panel", true);
-  }
-
-  function syncGeneratedLetterOutput() {
-    var payload;
-
-    if (!state.generatedLetter) {
-      return;
-    }
-
-    payload = buildCurrentLetterPayload();
-    state.generatedLetter = generateBatchLetter(payload);
-    $("generated-letter").value = state.generatedLetter;
-    $("print-letter-sheet").textContent = state.generatedLetter;
-    $("bcc-emails").textContent = getBatchRecipientEmails(payload.companies).join(", ");
-    syncLetterSummaryOutput();
   }
 
   function copyText(text, button, defaultLabel, copiedLabel) {
@@ -851,6 +812,45 @@
         });
         updateActiveStepFromScroll();
       });
+    }
+
+    function buildCurrentLetterPayload() {
+      return {
+        senderName: $("sender-name").value.trim(),
+        senderEmail: $("sender-email").value.trim(),
+        companies: selectedCompanies(),
+        requestTypes: state.selectedRights.slice(),
+        lang: state.lang
+      };
+    }
+
+    function syncLetterSummaryOutput() {
+      var payload;
+
+      if (!state.generatedLetter || state.lang !== "es") {
+        $("letter-summary-body").innerHTML = "";
+        setVisible("letter-summary-panel", false);
+        return;
+      }
+
+      payload = buildCurrentLetterPayload();
+      $("letter-summary-body").innerHTML = buildLetterSummaryHtml(payload);
+      setVisible("letter-summary-panel", true);
+    }
+
+    function syncGeneratedLetterOutput() {
+      var payload;
+
+      if (!state.generatedLetter) {
+        return;
+      }
+
+      payload = buildCurrentLetterPayload();
+      state.generatedLetter = generateBatchLetter(payload);
+      $("generated-letter").value = state.generatedLetter;
+      $("print-letter-sheet").textContent = state.generatedLetter;
+      $("bcc-emails").textContent = getBatchRecipientEmails(payload.companies).join(", ");
+      syncLetterSummaryOutput();
     }
 
     function syncEmailLinks() {
