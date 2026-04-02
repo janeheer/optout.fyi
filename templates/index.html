@@ -110,6 +110,46 @@
     display: block;
   }
 
+  /* Email send animation overlay */
+  .email-anim-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background: #0c1220;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .email-anim-overlay.is-playing {
+    display: flex;
+  }
+
+  .email-anim-img {
+    width: min(12rem, 50vw);
+    height: auto;
+  }
+
+  /* Card scale-up entrance from center */
+  @keyframes card-grow {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.05);
+    }
+    60% {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.03);
+    }
+    100% {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+
+  #red-card-shell.card-entrance {
+    animation: card-grow 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
   .card-lang-button,
   .compact-lang-button,
   .company-reference-trigger {
@@ -708,6 +748,9 @@
 
 {% block content %}
 <div data-page="index" id="index-experience" data-flow-state="picker" data-card-face="intro" class="space-y-10">
+  <div id="email-anim-overlay" class="email-anim-overlay" aria-hidden="true">
+    <img src="{{ url_for('static', filename='contact-email.gif') }}" alt="" class="email-anim-img">
+  </div>
   <section id="language-picker" aria-label="Language selection">
     <div id="red-card-shell" class="red-card">
       <div id="red-card-intro" class="red-card-face">

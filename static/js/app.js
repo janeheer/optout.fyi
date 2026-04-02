@@ -496,6 +496,43 @@
       }
     }
 
+    function playEmailAnimation(callback) {
+      var overlay = $("email-anim-overlay");
+      var shell = $("red-card-shell");
+      if (!overlay) {
+        callback();
+        return;
+      }
+
+      // Reset GIF by re-setting src
+      var img = overlay.querySelector("img");
+      if (img) {
+        var src = img.src;
+        img.src = "";
+        img.src = src;
+      }
+
+      // Hide the card during animation
+      shell.style.opacity = "0";
+      shell.classList.remove("card-entrance");
+      overlay.classList.add("is-playing");
+
+      window.setTimeout(function () {
+        // Set up countdown state while overlay is still showing
+        callback();
+
+        // Fade out overlay, grow in card
+        overlay.classList.remove("is-playing");
+        shell.style.opacity = "";
+        shell.classList.add("card-entrance");
+
+        // Clean up animation class
+        window.setTimeout(function () {
+          shell.classList.remove("card-entrance");
+        }, 800);
+      }, 2200);
+    }
+
     function updateLanguageButtons() {
       ["en", "es"].forEach(function (lang) {
         var compactButton = $("lang-toggle-" + lang);
@@ -1434,7 +1471,9 @@
       markAsSent(state.selectedCompanyIds.slice(), state.selectedRights.slice());
       state.sentRecord = getSentRecord();
       state.overdueCompanyIds = [];
-      renderCountdown();
+      playEmailAnimation(function () {
+        renderCountdown();
+      });
     });
 
     $("copy-letter").addEventListener("click", function () {
@@ -1502,8 +1541,10 @@
     var savedLang = null;
     try { savedLang = localStorage.getItem("optout_lang"); } catch (_e) {}
     if (state.sentRecord) {
-      // Active countdown — skip the picker and show countdown directly
-      setLang(savedLang === "es" ? "es" : "en", { skipDockAnimation: true });
+      // Active countdown — play email animation then show countdown
+      playEmailAnimation(function () {
+        setLang(savedLang === "es" ? "es" : "en", { skipDockAnimation: true });
+      });
       return;
     }
     setFlowState("picker");
