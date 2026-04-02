@@ -372,8 +372,6 @@
       dataBrokers: translations[lang].catDataBrokers,
       telecom: translations[lang].catTelecom
     };
-    var detailsLabel = translations[lang].companyReferences;
-
     return ["surveillance", "dataBrokers", "telecom"].map(function (category) {
       var items = companies.filter(function (company) {
         return company.category === category;
@@ -388,7 +386,6 @@
                   "<span class=\"company-card-name font-semibold text-ink\">" + escapeHtml(company.name) + "</span>" +
                 "</span>" +
               "</button>" +
-              "<button type=\"button\" data-company-trigger=\"" + escapeHtml(company.id) + "\" aria-expanded=\"false\" class=\"company-reference-trigger company-card-detail\">" + escapeHtml(detailsLabel) + "</button>" +
             "</div>" +
           "</div>"
         );
@@ -509,8 +506,8 @@
     }
 
     function syncTooltipTriggers(activeKey) {
-      document.querySelectorAll("[data-company-trigger]").forEach(function (trigger) {
-        var triggerKey = trigger.getAttribute("data-company-trigger");
+      document.querySelectorAll("[data-company-select]").forEach(function (trigger) {
+        var triggerKey = trigger.getAttribute("data-company-select");
         trigger.setAttribute("aria-expanded", activeKey && triggerKey === activeKey ? "true" : "false");
       });
 
@@ -947,37 +944,34 @@
         var companyId = button.getAttribute("data-company-select");
         button.addEventListener("click", function () {
           toggleCompanySelection(companyId);
-        });
-      });
-
-      document.querySelectorAll("[data-company-trigger]").forEach(function (button) {
-        var companyId = button.getAttribute("data-company-trigger");
-        button.addEventListener("mouseenter", function (event) {
-          if (!hasHoverPointer()) {
-            return;
+          var rect = button.getBoundingClientRect();
+          if (hasHoverPointer()) {
+            showTooltip(companyId, buildCompanyTooltipHtml(companyId), rect.left + (rect.width / 2), rect.bottom, false);
+          } else {
+            if (state.pinnedTooltipId === companyId) {
+              hideTooltip();
+            } else {
+              showTooltip(companyId, buildCompanyTooltipHtml(companyId), rect.left + (rect.width / 2), rect.bottom, true);
+            }
           }
+        });
 
+        button.addEventListener("mouseenter", function (event) {
+          if (!hasHoverPointer()) return;
           showTooltip(companyId, buildCompanyTooltipHtml(companyId), event.clientX, event.clientY, false);
         });
 
         button.addEventListener("mousemove", function (event) {
-          if (!hasHoverPointer() || state.pinnedTooltipId) {
-            return;
-          }
-
+          if (!hasHoverPointer() || state.pinnedTooltipId) return;
           if (state.activeTooltipId !== companyId) {
             showTooltip(companyId, buildCompanyTooltipHtml(companyId), event.clientX, event.clientY, false);
             return;
           }
-
           setTooltipPosition(event.clientX, event.clientY);
         });
 
         button.addEventListener("mouseleave", function () {
-          if (!hasHoverPointer() || state.pinnedTooltipId === companyId) {
-            return;
-          }
-
+          if (!hasHoverPointer() || state.pinnedTooltipId === companyId) return;
           hideTooltip();
         });
 
@@ -990,24 +984,6 @@
           if (!state.pinnedTooltipId) {
             hideTooltip();
           }
-        });
-
-        button.addEventListener("click", function (event) {
-          var rect = button.getBoundingClientRect();
-          event.preventDefault();
-          event.stopPropagation();
-
-          if (hasHoverPointer()) {
-            showTooltip(companyId, buildCompanyTooltipHtml(companyId), rect.left + (rect.width / 2), rect.bottom, false);
-            return;
-          }
-
-          if (state.pinnedTooltipId === companyId) {
-            hideTooltip();
-            return;
-          }
-
-          showTooltip(companyId, buildCompanyTooltipHtml(companyId), rect.left + (rect.width / 2), rect.bottom, true);
         });
       });
 
