@@ -18,10 +18,10 @@
     overflow: hidden;
     border-radius: 1.6rem;
     border: 1px solid rgba(255, 255, 255, 0.12);
-    background: #b91c1c;
-    box-shadow:
-      0 24px 54px rgba(10, 15, 26, 0.34),
-      0 8px 20px rgba(127, 29, 29, 0.22);
+    background-color: #b91c1c;
+    background-image: none;
+    background-clip: padding-box;
+    box-shadow: 0 18px 42px rgba(6, 12, 22, 0.28);
     transform: translate(-50%, -50%);
     transition:
       top 0.85s var(--flow-ease),
@@ -134,9 +134,7 @@
     min-height: 10.75rem;
     border-radius: 1.25rem;
     transform: none;
-    box-shadow:
-      0 16px 36px rgba(10, 15, 26, 0.26),
-      0 6px 16px rgba(127, 29, 29, 0.18);
+    box-shadow: 0 14px 30px rgba(6, 12, 22, 0.22);
   }
 
   #index-experience[data-flow-state="countdown"] #red-card-shell {
@@ -168,6 +166,12 @@
     display: grid;
     gap: 0.85rem;
     padding: 1rem 1.05rem;
+    overflow: hidden;
+    transition:
+      border-color 0.42s var(--flow-ease),
+      background-color 0.42s var(--flow-ease),
+      box-shadow 0.42s var(--flow-ease),
+      transform 0.32s var(--flow-ease);
   }
 
   .company-card-meta {
@@ -187,30 +191,66 @@
 
   .company-card-row {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 0.85rem;
   }
 
-  .company-card-checkbox {
-    margin-top: 0.45rem;
-    height: 1.1rem;
-    width: 1.1rem;
-    flex-shrink: 0;
-  }
-
-  .company-card-trigger {
+  .company-select-card {
     display: flex;
+    width: 100%;
     min-width: 0;
     flex: 1;
     align-items: center;
-    gap: 0.85rem;
-    border-radius: 0.85rem;
-    padding: 0.15rem;
+    border: 0;
+    background: transparent;
+    padding: 0;
     text-align: left;
+    color: inherit;
+    cursor: pointer;
   }
 
-  .company-card-trigger:focus-visible {
-    outline-offset: 3px;
+  .company-select-card:focus-visible {
+    outline-offset: 4px;
+  }
+
+  .company-card-detail {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    border: 1px solid rgba(74, 138, 184, 0.28);
+    background: rgba(74, 138, 184, 0.08);
+    padding: 0.5rem 0.8rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #c8dce8;
+  }
+
+  .company-card:hover {
+    border-color: rgba(74, 138, 184, 0.42);
+    transform: translateY(-1px);
+  }
+
+  .company-card.is-selected {
+    border-color: rgba(248, 113, 113, 0.7);
+    background: linear-gradient(135deg, rgba(185, 28, 28, 0.96), rgba(153, 27, 27, 0.82));
+    box-shadow:
+      0 18px 40px rgba(95, 17, 17, 0.34),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+  }
+
+  .company-card.is-selected .company-card-name,
+  .company-card.is-selected .company-card-detail {
+    color: #fff5f5;
+  }
+
+  .company-card.is-selected .company-card-detail {
+    border-color: rgba(255, 255, 255, 0.24);
+    background: rgba(255, 255, 255, 0.12);
   }
 
   .company-card-logo {
@@ -352,6 +392,72 @@
     color: #4a8ab8;
   }
 
+  .sent-confirm-card {
+    display: flex;
+    width: 100%;
+    align-items: flex-start;
+    gap: 0.9rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(74, 138, 184, 0.22);
+    background: rgba(22, 32, 50, 0.38);
+    padding: 1rem;
+    text-align: left;
+    color: inherit;
+    transition:
+      border-color 0.32s var(--flow-ease),
+      background-color 0.32s var(--flow-ease),
+      box-shadow 0.32s var(--flow-ease),
+      transform 0.24s var(--flow-ease);
+  }
+
+  .sent-confirm-card:hover {
+    border-color: rgba(248, 113, 113, 0.38);
+    transform: translateY(-1px);
+  }
+
+  .sent-confirm-card:focus-visible {
+    outline-offset: 4px;
+  }
+
+  .sent-confirm-card.is-selected {
+    border-color: rgba(248, 113, 113, 0.72);
+    background: linear-gradient(135deg, rgba(185, 28, 28, 0.94), rgba(153, 27, 27, 0.8));
+    box-shadow:
+      0 18px 36px rgba(95, 17, 17, 0.26),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .sent-confirm-card.is-selected .sent-confirm-indicator {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.22);
+    color: #fff5f5;
+  }
+
+  .sent-confirm-card.is-selected #sent-label,
+  .sent-confirm-card.is-selected #sent-description {
+    color: #fff5f5;
+  }
+
+  .sent-confirm-indicator {
+    display: inline-flex;
+    height: 2rem;
+    width: 2rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    border: 1px solid rgba(74, 138, 184, 0.28);
+    background: rgba(74, 138, 184, 0.08);
+    color: #c8dce8;
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+
+  .sent-confirm-copy {
+    display: grid;
+    gap: 0.18rem;
+  }
+
   .is-disabled-link {
     pointer-events: none;
     opacity: 0.6;
@@ -400,9 +506,7 @@
       margin: 0 auto 1.5rem;
       transform: none;
       border-radius: 1.25rem;
-      box-shadow:
-        0 18px 38px rgba(10, 15, 26, 0.28),
-        0 8px 18px rgba(127, 29, 29, 0.16);
+      box-shadow: 0 14px 30px rgba(6, 12, 22, 0.22);
     }
 
     .red-card-face {
@@ -463,6 +567,17 @@
 
     .company-card {
       padding: 0.95rem;
+    }
+
+    .company-card-row {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .company-card-detail {
+      width: 100%;
+      justify-content: center;
+      text-align: center;
     }
   }
 
@@ -705,6 +820,10 @@
       </div>
     </section>
 
+    <div id="letter-live-region" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+    <div id="countdown-live-region" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+    <div id="countdown-alert-live-region" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+
     <section id="generator" class="hidden-panel space-y-10 border-t border-line pt-10">
       <div class="flex items-center justify-end">
         <button id="rights-reference-trigger" type="button" class="rights-tooltip-trigger" aria-expanded="false">
@@ -756,33 +875,42 @@
         <div id="rights-list" class="space-y-3"></div>
       </div>
 
-      <div id="step-info" class="scroll-mt-32 space-y-4 border-t border-line pt-10 lg:scroll-mt-10">
-        <h2 id="info-heading" class="text-xl font-semibold text-ink"></h2>
-        <p id="info-note" class="text-sm leading-7 text-muted"></p>
-        <div class="grid gap-4 sm:grid-cols-2">
-          <label class="block">
+        <div id="step-info" class="scroll-mt-32 space-y-4 border-t border-line pt-10 lg:scroll-mt-10">
+          <h2 id="info-heading" class="text-xl font-semibold text-ink"></h2>
+          <p id="info-note" class="text-sm leading-7 text-muted"></p>
+          <div class="rounded border border-amber-300/30 bg-amber-300/10 p-4">
+            <p id="identity-risk-title" class="text-sm font-semibold text-amber-50"></p>
+            <p id="identity-risk-body" class="mt-2 text-sm leading-7 text-amber-100/90"></p>
+          </div>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <label class="block">
             <span id="name-label" class="text-sm text-ink"></span>
             <input id="sender-name" type="text" class="mt-2 w-full rounded border border-line bg-transparent px-3 py-3 text-ink placeholder:text-muted/50">
           </label>
           <label class="block">
             <span id="email-label" class="text-sm text-ink"></span>
-            <input id="sender-email" type="email" class="mt-2 w-full rounded border border-line bg-transparent px-3 py-3 text-ink placeholder:text-muted/50">
-          </label>
+              <input id="sender-email" type="email" class="mt-2 w-full rounded border border-line bg-transparent px-3 py-3 text-ink placeholder:text-muted/50">
+            </label>
+          </div>
         </div>
-      </div>
 
       <div id="step-generate" class="scroll-mt-32 border-t border-line pt-10 lg:scroll-mt-10">
         <button id="generate-letter" type="button" class="red-card w-full px-6 py-4 text-base font-bold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"></button>
       </div>
 
-      <section id="letter-output" class="hidden-panel space-y-6 border-t border-line pt-10">
-        <div>
-          <h2 id="letter-heading" class="text-xl font-semibold text-ink"></h2>
-          <p id="review-note" class="mt-3 text-sm leading-7 text-muted">
-            Review the draft below. Copy it, download it, or open it in your email app.
-          </p>
-        </div>
-        <textarea id="generated-letter" readonly class="min-h-[26rem] w-full rounded border border-line bg-transparent px-4 py-4 font-mono text-sm leading-7 text-ink"></textarea>
+        <section id="letter-output" class="hidden-panel space-y-6 border-t border-line pt-10">
+          <div>
+            <h2 id="letter-heading" class="text-xl font-semibold text-ink"></h2>
+            <p id="review-note" class="mt-3 text-sm leading-7 text-muted">
+              Review the draft below. Copy it, download it, or open it in your email app.
+            </p>
+          </div>
+          <div id="letter-summary-panel" class="hidden-panel space-y-3 rounded border border-line bg-page/35 p-4">
+            <p class="text-sm font-semibold text-ink">Resumen en espanol</p>
+            <div id="letter-summary-body" class="space-y-3 text-sm leading-7 text-ink"></div>
+          </div>
+          <textarea id="generated-letter" readonly class="min-h-[26rem] w-full rounded border border-line bg-transparent px-4 py-4 font-mono text-sm leading-7 text-ink"></textarea>
+          <pre id="print-letter-sheet" class="hidden-panel" aria-hidden="true"></pre>
         <div class="space-y-3 rounded border border-line p-4">
           <p class="text-sm text-ink">
             <strong id="subject-label" class="text-ink"></strong>
@@ -793,6 +921,7 @@
             <span id="bcc-emails"></span>
           </p>
           <p id="bcc-explain" class="text-sm leading-7 text-muted"></p>
+          <p id="mailto-length-warning" class="hidden-panel text-sm leading-7 text-amber-300"></p>
           <p id="no-email-warning" class="hidden-panel text-sm leading-7 text-red-300"></p>
         </div>
         <div class="flex flex-wrap gap-3">
@@ -851,13 +980,13 @@
           </div>
         </section>
         <div class="rounded border border-line p-4">
-          <label class="flex items-start gap-3">
-            <input id="confirm-sent" type="checkbox" class="mt-1 h-4 w-4">
-            <span class="space-y-1">
+          <button id="confirm-sent" type="button" class="sent-confirm-card" aria-pressed="false">
+            <span class="sent-confirm-indicator" aria-hidden="true">+</span>
+            <span class="sent-confirm-copy">
               <span id="sent-label" class="block text-sm font-medium text-ink"></span>
               <span id="sent-description" class="block text-sm leading-7 text-muted"></span>
             </span>
-          </label>
+          </button>
           <button id="start-countdown" type="button" class="mt-4 rounded bg-red-500 px-4 py-2 text-sm text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50" disabled></button>
         </div>
         <p id="legal-disclaimer-bottom" class="text-sm leading-7 text-muted"></p>
