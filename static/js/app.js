@@ -1857,15 +1857,17 @@
       }
     });
     // Footer
-    var footerText = document.querySelector("[data-i18n-footer]");
-    if (footerText && pageStrings.footer_zero) {
-      footerText.textContent = pageStrings.footer_zero[lang];
-    }
-    var footerTagline = document.querySelector("[data-i18n-footer-tagline]");
     var footerTaglineKey = getFooterTaglineKey();
-    if (footerTagline && pageStrings[footerTaglineKey]) {
-      footerTagline.textContent = pageStrings[footerTaglineKey][lang];
-    }
+    document.querySelectorAll("[data-i18n-footer], [data-i18n-countdown-footer]").forEach(function (el) {
+      if (pageStrings.footer_zero) {
+        el.textContent = pageStrings.footer_zero[lang];
+      }
+    });
+    document.querySelectorAll("[data-i18n-footer-tagline], [data-i18n-countdown-tagline]").forEach(function (el) {
+      if (pageStrings[footerTaglineKey]) {
+        el.textContent = pageStrings[footerTaglineKey][lang];
+      }
+    });
   }
 
   function initializePage() {
