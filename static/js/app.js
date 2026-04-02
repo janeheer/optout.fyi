@@ -1124,6 +1124,7 @@
         clearLiveRegion("countdown-alert-live-region");
         setVisible("countdown-panel", false);
         setVisible("countdown-companies-panel", false);
+        setVisible("countdown-share-panel", false);
         setVisible("overdue-panel", false);
         if (!state.lang) {
           setFlowState("picker");
@@ -1151,6 +1152,7 @@
 
         setVisible("countdown-panel", false);
         setVisible("countdown-companies-panel", false);
+        setVisible("countdown-share-panel", false);
         setVisible("overdue-panel", true);
         setFlowState("overdue");
         $("times-up-title").textContent = copy.timesUp;
@@ -1224,6 +1226,7 @@
         : "The following companies have been served your CCPA/CPRA privacy rights request and are legally obligated to respond within the deadline above. Failure to comply constitutes a violation subject to penalties of up to $7,500 per infraction.";
       $("start-over-inline").textContent = copy.startOver;
       setVisible("countdown-companies-panel", true);
+      setVisible("countdown-share-panel", true);
       $("notified-company-list-inline").innerHTML = notifiedCompanies.map(function (company) {
         var logoUrl = "https://www.google.com/s2/favicons?domain=" + encodeURIComponent(company.domain || "") + "&sz=32";
         return "<button type=\"button\" data-countdown-company=\"" + escapeHtml(company.id) + "\" class=\"inline-flex items-center gap-2 rounded-full border border-line bg-panel/60 px-3 py-2 text-xs font-semibold text-ink transition hover:border-ice hover:text-ice cursor-pointer\">" +
@@ -1396,6 +1399,7 @@
       setVisible("complaint-output", false);
       setVisible("countdown-panel", false);
       setVisible("countdown-companies-panel", false);
+      setVisible("countdown-share-panel", false);
       setVisible("overdue-panel", false);
       clearLiveRegion("letter-live-region");
       clearLiveRegion("countdown-live-region");
@@ -1494,6 +1498,39 @@
       playEmailAnimation(function () {
         renderCountdown();
       }, event.clientX, event.clientY);
+    });
+
+    // Share buttons
+    var shareUrl = "https://optout.fyi";
+    var shareText = "I just exercised my CCPA/CPRA data privacy rights against AI surveillance companies. You can too:";
+
+    $("share-x").addEventListener("click", function () {
+      window.open("https://x.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl), "_blank");
+    });
+    $("share-fb").addEventListener("click", function () {
+      window.open("https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(shareUrl), "_blank");
+    });
+    $("share-wa").addEventListener("click", function () {
+      window.open("https://wa.me/?text=" + encodeURIComponent(shareText + " " + shareUrl), "_blank");
+    });
+    $("share-tg").addEventListener("click", function () {
+      window.open("https://t.me/share/url?url=" + encodeURIComponent(shareUrl) + "&text=" + encodeURIComponent(shareText), "_blank");
+    });
+    $("share-sms").addEventListener("click", function () {
+      window.open("sms:?&body=" + encodeURIComponent(shareText + " " + shareUrl));
+    });
+    $("share-copy").addEventListener("click", function () {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(shareUrl).then(function () {
+          var btn = $("share-copy");
+          btn.style.borderColor = "#4a8ab8";
+          btn.style.color = "#4a8ab8";
+          window.setTimeout(function () {
+            btn.style.borderColor = "";
+            btn.style.color = "";
+          }, 1500);
+        });
+      }
     });
 
     $("copy-letter").addEventListener("click", function () {
