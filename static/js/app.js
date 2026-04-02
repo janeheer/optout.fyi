@@ -494,7 +494,7 @@
       }
     }
 
-    function playEmailAnimation(callback) {
+    function playEmailAnimation(callback, clickX, clickY) {
       var overlay = $("email-anim-overlay");
       var shell = $("red-card-shell");
       if (!overlay) {
@@ -508,6 +508,19 @@
         var src = img.src;
         img.src = "";
         img.src = src;
+
+        // Position the image at the click point
+        if (typeof clickX === "number" && typeof clickY === "number") {
+          img.style.position = "fixed";
+          img.style.left = clickX + "px";
+          img.style.top = clickY + "px";
+          img.style.transform = "translate(-50%, -50%)";
+        } else {
+          img.style.position = "";
+          img.style.left = "";
+          img.style.top = "";
+          img.style.transform = "";
+        }
       }
 
       // Hide the card during animation
@@ -1446,13 +1459,13 @@
     });
     bindRightsTooltipTrigger();
 
-    $("start-countdown").addEventListener("click", function () {
+    $("start-countdown").addEventListener("click", function (event) {
       markAsSent(state.selectedCompanyIds.slice(), state.selectedRights.slice());
       state.sentRecord = getSentRecord();
       state.overdueCompanyIds = [];
       playEmailAnimation(function () {
         renderCountdown();
-      });
+      }, event.clientX, event.clientY);
     });
 
     $("copy-letter").addEventListener("click", function () {
