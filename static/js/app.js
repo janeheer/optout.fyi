@@ -311,9 +311,8 @@
       return "";
     }
 
-    return "mailto:" + payload.senderEmail +
+    return "mailto:" + encodeURIComponent(emails.join(",")) +
       "?subject=" + encodeURIComponent(getBatchEmailSubject(payload.lang)) +
-      "&bcc=" + encodeURIComponent(emails.join(",")) +
       "&body=" + encodeURIComponent(generateBatchLetter(payload));
   }
 
@@ -445,7 +444,6 @@
     var stepOrder = [
       { key: "companies", id: "step-companies" },
       { key: "rights", id: "step-rights" },
-      { key: "info", id: "step-info" },
       { key: "generate", id: "step-generate" }
     ];
 
@@ -750,19 +748,12 @@
       return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     }
 
-    function hasIdentityInfo() {
-      return Boolean($("sender-name").value.trim() && $("sender-email").value.trim());
-    }
-
     function isStepComplete(stepKey) {
       if (stepKey === "companies") {
         return state.selectedCompanyIds.length > 0;
       }
       if (stepKey === "rights") {
         return state.selectedRights.length > 0;
-      }
-      if (stepKey === "info") {
-        return hasIdentityInfo();
       }
       if (stepKey === "generate") {
         return Boolean(state.generatedLetter);
@@ -849,9 +840,11 @@
     }
 
     function buildCurrentLetterPayload() {
+      var placeholderName = state.lang === "es" ? "[TU NOMBRE]" : "[YOUR NAME]";
+      var placeholderEmail = state.lang === "es" ? "[TU CORREO ELECTRÓNICO]" : "[YOUR EMAIL]";
       return {
-        senderName: $("sender-name").value.trim(),
-        senderEmail: $("sender-email").value.trim(),
+        senderName: placeholderName,
+        senderEmail: placeholderEmail,
         companies: selectedCompanies(),
         requestTypes: state.selectedRights.slice(),
         lang: state.lang
@@ -891,7 +884,7 @@
       var copy = text();
       var payload = buildCurrentLetterPayload();
       var mailtoWarning = $("mailto-length-warning");
-      var mailtoUrl = payload.senderName && payload.senderEmail && payload.companies.length > 0
+      var mailtoUrl = payload.companies.length > 0
         ? buildMailtoUrl(payload)
         : "";
       var mailtoTooLong = mailtoUrl.length > MAILTO_WARNING_LENGTH;
@@ -944,9 +937,7 @@
 
     function syncGenerateButton() {
       var copy = text();
-      var name = $("sender-name").value.trim();
-      var email = $("sender-email").value.trim();
-      var canGenerate = state.selectedCompanyIds.length > 0 && state.selectedRights.length > 0 && name && email;
+      var canGenerate = state.selectedCompanyIds.length > 0 && state.selectedRights.length > 0;
       $("generate-letter").disabled = !canGenerate;
       $("generate-letter").textContent = copy.generate + (state.selectedCompanyIds.length ? " " + copy.forGenerating + " " + state.selectedCompanyIds.length : "");
       syncEmailLinks();
@@ -1284,12 +1275,6 @@
       $("select-all-companies").textContent = copy.selectAll + " (" + companies.length + ")";
       $("rights-heading").textContent = copy.yourRights;
       $("rights-note").textContent = copy.rightsNote;
-      $("info-heading").textContent = copy.yourInfo;
-      $("info-note").textContent = copy.infoNote;
-      $("identity-risk-title").textContent = copy.identityRiskTitle;
-      $("identity-risk-body").textContent = copy.identityRiskBody;
-      $("name-label").textContent = copy.fullName;
-      $("email-label").textContent = copy.email;
         $("letter-heading").textContent = copy.yourLetter;
         $("review-note").textContent = copy.reviewNote;
         $("subject-label").textContent = copy.emailSubject + ": ";
@@ -1313,9 +1298,6 @@
       $("sent-description").textContent = copy.iSentItDesc;
       $("start-countdown").textContent = copy.startCountdown;
       $("legal-disclaimer-bottom").textContent = copy.legalDisclaimer;
-      $("sender-name").placeholder = copy.fullName;
-      $("sender-email").placeholder = copy.email;
-
       $("get-started").textContent = copy.getStarted;
       updateLanguageButtons();
 
@@ -1360,8 +1342,6 @@
       state.selectedRights = DEFAULT_RIGHTS.slice();
       state.overdueCompanyIds = [];
 
-      $("sender-name").value = "";
-      $("sender-email").value = "";
       $("overdue-name").value = "";
       $("overdue-email").value = "";
       $("generated-letter").value = "";
@@ -1453,8 +1433,6 @@
       syncGenerateButton();
     });
 
-    $("sender-name").addEventListener("input", syncGenerateButton);
-    $("sender-email").addEventListener("input", syncGenerateButton);
     $("generate-letter").addEventListener("click", generateLetter);
     $("confirm-sent").addEventListener("click", function () {
       setSentConfirmation($("confirm-sent").getAttribute("aria-pressed") !== "true");
