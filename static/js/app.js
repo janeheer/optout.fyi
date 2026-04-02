@@ -931,7 +931,7 @@
       button.classList.toggle("is-selected", confirmed);
 
       if (indicator) {
-        indicator.textContent = confirmed ? "✓" : "+";
+        indicator.textContent = confirmed ? "✓" : "○";
       }
     }
 

@@ -19,8 +19,6 @@
     border-radius: 1.6rem;
     border: 1px solid rgba(255, 255, 255, 0.12);
     background-color: #b91c1c;
-    background-image: none;
-    background-clip: padding-box;
     box-shadow: 0 18px 42px rgba(6, 12, 22, 0.28);
     transform: translate(-50%, -50%);
     transition:
@@ -28,7 +26,6 @@
       left 0.85s var(--flow-ease),
       width 0.85s var(--flow-ease),
       min-height 0.85s var(--flow-ease),
-      padding 0.85s var(--flow-ease),
       border-radius 0.85s var(--flow-ease),
       transform 0.85s var(--flow-ease),
       box-shadow 0.85s var(--flow-ease);
@@ -118,12 +115,12 @@
   }
 
   #index-experience[data-flow-state="countdown"] #app-shell {
-    padding-top: 37rem;
+    padding-top: max(37rem, calc(50vh + 15rem));
   }
 
   #app-shell > section {
     max-width: 58rem;
-    margin-left: auto;
+    margin-inline: auto;
   }
 
   #index-experience[data-flow-state="docked"] #red-card-shell,
@@ -166,7 +163,6 @@
     display: grid;
     gap: 0.85rem;
     padding: 1rem 1.05rem;
-    overflow: hidden;
     transition:
       border-color 0.42s var(--flow-ease),
       background-color 0.42s var(--flow-ease),
@@ -291,13 +287,6 @@
 
   .company-reference-tooltip-card {
     padding: 0.95rem 1rem;
-  }
-
-  .company-reference-popover {
-    opacity: 0;
-    transform: translateY(-0.35rem);
-    pointer-events: none;
-    transition: opacity 0.22s ease, transform 0.22s ease;
   }
 
   .company-reference-kicker {
@@ -587,24 +576,7 @@
     }
   }
 
-  @media (min-width: 1024px) {
-    .company-group-grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-
   @media (max-width: 639px) {
-    #index-experience[data-flow-state="docked"] #app-shell,
-    #index-experience[data-flow-state="overdue"] #app-shell {
-      padding-top: 0;
-    }
-
-    #index-experience[data-flow-state="docked"] #red-card-shell,
-    #index-experience[data-flow-state="overdue"] #red-card-shell {
-      top: auto;
-      min-height: auto;
-    }
-
     .compact-card-layout {
       gap: 0.9rem;
       justify-content: flex-start;
@@ -631,8 +603,12 @@
   }
 
   @media (min-width: 1024px) {
+    .company-group-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
     #app-shell {
-      transform: translate3d(2.75rem, 0, 0);
+      transform: translate3d(0, 2rem, 0);
     }
 
     #index-experience[data-flow-state="docked"] #app-shell,
@@ -642,7 +618,7 @@
     }
 
     #index-experience[data-flow-state="countdown"] #app-shell {
-      padding-top: 39rem;
+      padding-top: max(39rem, calc(50vh + 17rem));
     }
 
     #index-experience[data-flow-state="docked"] #red-card-shell,
@@ -875,42 +851,42 @@
         <div id="rights-list" class="space-y-3"></div>
       </div>
 
-        <div id="step-info" class="scroll-mt-32 space-y-4 border-t border-line pt-10 lg:scroll-mt-10">
-          <h2 id="info-heading" class="text-xl font-semibold text-ink"></h2>
-          <p id="info-note" class="text-sm leading-7 text-muted"></p>
-          <div class="rounded border border-amber-300/30 bg-amber-300/10 p-4">
-            <p id="identity-risk-title" class="text-sm font-semibold text-amber-50"></p>
-            <p id="identity-risk-body" class="mt-2 text-sm leading-7 text-amber-100/90"></p>
-          </div>
-          <div class="grid gap-4 sm:grid-cols-2">
-            <label class="block">
+      <div id="step-info" class="scroll-mt-32 space-y-4 border-t border-line pt-10 lg:scroll-mt-10">
+        <h2 id="info-heading" class="text-xl font-semibold text-ink"></h2>
+        <p id="info-note" class="text-sm leading-7 text-muted"></p>
+        <div class="rounded border border-amber-300/30 bg-amber-300/10 p-4">
+          <p id="identity-risk-title" class="text-sm font-semibold text-amber-50"></p>
+          <p id="identity-risk-body" class="mt-2 text-sm leading-7 text-amber-100/90"></p>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <label class="block">
             <span id="name-label" class="text-sm text-ink"></span>
             <input id="sender-name" type="text" class="mt-2 w-full rounded border border-line bg-transparent px-3 py-3 text-ink placeholder:text-muted/50">
           </label>
           <label class="block">
             <span id="email-label" class="text-sm text-ink"></span>
-              <input id="sender-email" type="email" class="mt-2 w-full rounded border border-line bg-transparent px-3 py-3 text-ink placeholder:text-muted/50">
-            </label>
-          </div>
+            <input id="sender-email" type="email" class="mt-2 w-full rounded border border-line bg-transparent px-3 py-3 text-ink placeholder:text-muted/50">
+          </label>
         </div>
+      </div>
 
       <div id="step-generate" class="scroll-mt-32 border-t border-line pt-10 lg:scroll-mt-10">
         <button id="generate-letter" type="button" class="red-card w-full px-6 py-4 text-base font-bold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"></button>
       </div>
 
-        <section id="letter-output" class="hidden-panel space-y-6 border-t border-line pt-10">
-          <div>
-            <h2 id="letter-heading" class="text-xl font-semibold text-ink"></h2>
-            <p id="review-note" class="mt-3 text-sm leading-7 text-muted">
-              Review the draft below. Copy it, download it, or open it in your email app.
-            </p>
-          </div>
-          <div id="letter-summary-panel" class="hidden-panel space-y-3 rounded border border-line bg-page/35 p-4">
-            <p class="text-sm font-semibold text-ink">Resumen en espanol</p>
-            <div id="letter-summary-body" class="space-y-3 text-sm leading-7 text-ink"></div>
-          </div>
-          <textarea id="generated-letter" readonly class="min-h-[26rem] w-full rounded border border-line bg-transparent px-4 py-4 font-mono text-sm leading-7 text-ink"></textarea>
-          <pre id="print-letter-sheet" class="hidden-panel" aria-hidden="true"></pre>
+      <section id="letter-output" class="hidden-panel space-y-6 border-t border-line pt-10">
+        <div>
+          <h2 id="letter-heading" class="text-xl font-semibold text-ink"></h2>
+          <p id="review-note" class="mt-3 text-sm leading-7 text-muted">
+            Review the draft below. Copy it, download it, or open it in your email app.
+          </p>
+        </div>
+        <div id="letter-summary-panel" class="hidden-panel space-y-3 rounded border border-line bg-page/35 p-4">
+          <p class="text-sm font-semibold text-ink">Resumen en espanol</p>
+          <div id="letter-summary-body" class="space-y-3 text-sm leading-7 text-ink"></div>
+        </div>
+        <textarea id="generated-letter" readonly class="min-h-[26rem] w-full rounded border border-line bg-transparent px-4 py-4 font-mono text-sm leading-7 text-ink"></textarea>
+        <pre id="print-letter-sheet" class="hidden-panel" aria-hidden="true"></pre>
         <div class="space-y-3 rounded border border-line p-4">
           <p class="text-sm text-ink">
             <strong id="subject-label" class="text-ink"></strong>
