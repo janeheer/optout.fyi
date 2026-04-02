@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">optout.fyi share card</title>
+  <desc id="desc">Share card for the immigrant data rights tool on optout.fyi.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b91c1c" />
+      <stop offset="100%" stop-color="#4a8ab8" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#0c1220" />
+  <rect x="0" y="0" width="1200" height="630" fill="url(#bg)" opacity="0.95" />
+  <rect x="50" y="50" width="1100" height="530" rx="28" fill="#0c1220" opacity="0.9" />
+  <text x="86" y="104" fill="#d4842a" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="1.2">optout.fyi</text>
+  <text x="86" y="198" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="58" font-weight="800">Immigrant data rights tool</text>
+  <text x="86" y="275" fill="#c8dce8" font-family="Inter, Arial, sans-serif" font-size="27">
+    <tspan x="86" dy="0">Generate CCPA and CPRA privacy rights letters for companies that</tspan>
+    <tspan x="86" dy="40">collect, profile, or sell your data. No accounts. No analytics.</tspan>
+    <tspan x="86" dy="40">No server-side storage of your information.</tspan>
+  </text>
+  <text x="86" y="510" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="700">Your digital data red card</text>
+  <rect x="905" y="148" width="200" height="290" rx="18" fill="#dc2626" />
+  <rect x="940" y="186" width="130" height="166" rx="10" fill="none" stroke="#ffffff" stroke-width="6" />
+  <line x1="958" y1="218" x2="1052" y2="218" stroke="#ffffff" stroke-width="6" stroke-linecap="round" />
+  <line x1="958" y1="252" x2="1052" y2="252" stroke="#ffffff" stroke-width="6" stroke-linecap="round" />
+  <line x1="958" y1="286" x2="1020" y2="286" stroke="#ffffff" stroke-width="6" stroke-linecap="round" />
+</svg>

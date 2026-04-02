@@ -6,8 +6,20 @@
   <title>{{ page_title or "optout.fyi — Your Digital Data Red Card" }}</title>
   <meta
     name="description"
-    content="Your digital data red card. Generate legally-grounded CCPA/CPRA privacy rights letters demanding AI surveillance companies delete, disclose, and stop selling your data. No data collected."
+    content="{{ page_description or 'Your digital data red card. Generate legally-grounded CCPA/CPRA privacy rights letters demanding AI surveillance companies delete, disclose, and stop selling your data. No data collected.' }}"
   >
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ page_title or 'optout.fyi — Your Digital Data Red Card' }}">
+  <meta property="og:description" content="{{ page_description or 'Your digital data red card. Generate legally-grounded CCPA/CPRA privacy rights letters demanding AI surveillance companies delete, disclose, and stop selling your data. No data collected.' }}">
+  <meta property="og:image" content="{{ og_image_url or 'https://optout.fyi/static/og-card.png' }}">
+  <meta property="og:image:alt" content="optout.fyi share card for the immigrant data rights tool">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ page_title or 'optout.fyi — Your Digital Data Red Card' }}">
+  <meta name="twitter:description" content="{{ page_description or 'Your digital data red card. Generate legally-grounded CCPA/CPRA privacy rights letters demanding AI surveillance companies delete, disclose, and stop selling your data. No data collected.' }}">
+  <meta name="twitter:image" content="{{ og_image_url or 'https://optout.fyi/static/og-card.png' }}">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -128,6 +140,109 @@
         scroll-snap-align: start;
         white-space: nowrap;
       }
+
+      .mobile-bottom-nav {
+        position: fixed;
+        left: 0.75rem;
+        right: 0.75rem;
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
+        z-index: 40;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.5rem;
+        padding: 0.5rem;
+        border: 1px solid rgba(30, 48, 72, 0.95);
+        border-radius: 1rem;
+        background: rgba(12, 18, 32, 0.94);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.32);
+        backdrop-filter: blur(14px);
+      }
+
+      .mobile-bottom-nav a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0.7rem 0.9rem;
+        border-radius: 0.8rem;
+        border: 1px solid transparent;
+        color: #c8dce8;
+        font-size: 0.82rem;
+        font-weight: 600;
+        line-height: 1.1;
+        background: rgba(22, 32, 50, 0.72);
+        transition: all 0.15s ease;
+      }
+
+      .mobile-bottom-nav a:hover,
+      .mobile-bottom-nav a:focus-visible {
+        border-color: rgba(74, 138, 184, 0.8);
+        background: rgba(74, 138, 184, 0.14);
+        color: #ffffff;
+      }
+    }
+
+    @media print {
+      @page {
+        margin: 0.75in;
+      }
+
+      html,
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+
+      body {
+        font-size: 12pt;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+
+      body.print-letter-ready .h-1,
+      body.print-letter-ready header,
+      body.print-letter-ready footer,
+      body.print-letter-ready .mobile-bottom-nav,
+      body.print-letter-ready [href="#main"],
+      body.print-letter-ready #hero-shell,
+      body.print-letter-ready #how-it-works-panel {
+        display: none !important;
+      }
+
+      body.print-letter-ready #main,
+      body.print-letter-ready #main > div {
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      body.print-letter-ready #generator > :not(#letter-output) {
+        display: none !important;
+      }
+
+      body.print-letter-ready #letter-output {
+        display: block !important;
+        border: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      body.print-letter-ready #letter-output > :not(#print-letter-sheet) {
+        display: none !important;
+      }
+
+      body.print-letter-ready #print-letter-sheet {
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        background: transparent !important;
+        color: #000000 !important;
+        white-space: pre-wrap;
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        font-size: 12pt;
+        line-height: 1.6;
+      }
     }
   </style>
   {% block head %}{% endblock %}
@@ -156,7 +271,7 @@
       </div>
     </header>
 
-    <main id="main">
+    <main id="main" class="pb-24 sm:pb-0">
       <div class="mx-auto {{ page_shell_class or 'max-w-3xl' }} px-4 py-8 sm:px-5 sm:py-14">
         {% block content %}{% endblock %}
       </div>
@@ -164,16 +279,22 @@
 
     <footer class="border-t border-line">
       <div class="mx-auto {{ page_shell_class or 'max-w-3xl' }} px-5 py-8">
-        <div class="flex flex-col gap-2 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
-          <p data-i18n-footer>Zero data collected. Everything runs in your browser.</p>
-          <p class="text-xs text-muted/60">
-            <span data-i18n="footer_made_with_haste">Made with haste.</span>
-            <a data-i18n="footer_contact" class="underline hover:text-ice" href="mailto:jheer@ucla.edu">Contact</a>.
-            <a data-i18n="footer_source" class="underline hover:text-ice" href="https://github.com/janeheer/optout.fyi" target="_blank" rel="noopener noreferrer">Source</a>.
-          </p>
-        </div>
+            <div class="flex flex-col gap-2 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
+              <p data-i18n-footer>Zero data collected. Everything runs in your browser.</p>
+              <p class="text-xs text-muted/60">
+               <span data-i18n-footer-tagline>A tool for those who need it most.</span>
+               <a data-i18n="footer_contact" class="underline hover:text-ice" href="mailto:jheer@ucla.edu">Contact</a>.
+               <a data-i18n="footer_source" class="underline hover:text-ice" href="https://github.com/janeheer/optout.fyi" target="_blank" rel="noopener noreferrer">Source</a>.
+              </p>
+            </div>
       </div>
     </footer>
+
+    <nav aria-label="Primary" class="mobile-bottom-nav sm:hidden">
+      <a href="/" data-i18n="nav_letter">Letter</a>
+      <a href="/guide" data-i18n="nav_guide">Guide</a>
+      <a href="/resources" data-i18n="nav_resources">Resources</a>
+    </nav>
   </div>
 
   <script src="{{ url_for('static', filename='js/data.js') }}"></script>

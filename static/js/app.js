@@ -25,7 +25,19 @@
   var STORAGE_KEY = "optout_sent";
   var DEFAULT_RIGHTS = ["RIGHT_TO_DELETE", "OPT_OUT_SALE", "LIMIT_SENSITIVE", "OPT_OUT_PROFILING"];
   var GUIDE_DEFAULT_RIGHTS = ["RIGHT_TO_DELETE", "OPT_OUT_SALE"];
-  var BATCH_EMAIL_SUBJECT = "CCPA/CPRA Privacy Rights Request";
+  var MAILTO_WARNING_LENGTH = 2000;
+  function getBatchEmailSubject(lang) {
+    return "CCPA/CPRA Privacy Rights Request";
+  }
+
+  var SPANISH_RIGHT_SUMMARIES = {
+    RIGHT_TO_KNOW: "que revelen que informacion personal tienen sobre ti, de donde la obtuvieron y con quien la compartieron",
+    RIGHT_TO_DELETE: "que eliminen la informacion personal que tengan sobre ti",
+    RIGHT_TO_CORRECT: "que corrijan informacion personal inexacta",
+    OPT_OUT_SALE: "que dejen de vender o compartir tu informacion personal",
+    LIMIT_SENSITIVE: "que limiten el uso de informacion personal sensible",
+    OPT_OUT_PROFILING: "que dejen de usar tus datos para decisiones automatizadas o perfiles"
+  };
 
   function $(id) {
     return document.getElementById(id);
@@ -182,48 +194,76 @@
       .filter(function (email) { return Boolean(email); });
   }
 
-  function getRequestParagraphs(selectedRequestTypes) {
+  function getRequestParagraphs(selectedRequestTypes, lang) {
+    var isSpanish = lang === "es";
     var paragraphs = [];
 
     if (selectedRequestTypes.indexOf("RIGHT_TO_KNOW") !== -1) {
-      paragraphs.push("RIGHT TO KNOW (" + citations.RIGHT_TO_KNOW.statute + "): I request that you disclose to me: (1) the categories of personal information you have collected about me; (2) the specific pieces of personal information you have collected about me; (3) the categories of sources from which the personal information was collected; (4) the business or commercial purpose for collecting, selling, or sharing my personal information; (5) the categories of third parties to whom you have disclosed my personal information; and (6) if you have sold or shared my personal information, the categories of personal information sold or shared and the categories of third parties to whom it was sold or shared.");
+      paragraphs.push(isSpanish
+        ? "DERECHO A SABER (" + citations.RIGHT_TO_KNOW.statute + "): Solicito que me revelen: (1) las categorías de información personal que han recopilado sobre mí; (2) las piezas específicas de información personal que han recopilado sobre mí; (3) las categorías de fuentes de las que se recopiló la información personal; (4) el propósito comercial o empresarial para recopilar, vender o compartir mi información personal; (5) las categorías de terceros a quienes han divulgado mi información personal; y (6) si han vendido o compartido mi información personal, las categorías de información personal vendida o compartida y las categorías de terceros a quienes se vendió o compartió."
+        : "RIGHT TO KNOW (" + citations.RIGHT_TO_KNOW.statute + "): I request that you disclose to me: (1) the categories of personal information you have collected about me; (2) the specific pieces of personal information you have collected about me; (3) the categories of sources from which the personal information was collected; (4) the business or commercial purpose for collecting, selling, or sharing my personal information; (5) the categories of third parties to whom you have disclosed my personal information; and (6) if you have sold or shared my personal information, the categories of personal information sold or shared and the categories of third parties to whom it was sold or shared.");
     }
 
     if (selectedRequestTypes.indexOf("RIGHT_TO_DELETE") !== -1) {
-      paragraphs.push("RIGHT TO DELETE (" + citations.RIGHT_TO_DELETE.statute + "): I request that you delete any and all personal information you have collected from me or about me. I further request that you direct any service providers or contractors with whom you have shared my personal information to delete my personal information from their records as well.");
+      paragraphs.push(isSpanish
+        ? "DERECHO A ELIMINAR (" + citations.RIGHT_TO_DELETE.statute + "): Solicito que eliminen toda la información personal que hayan recopilado de mí o sobre mí. Además, solicito que instruyan a cualquier proveedor de servicios o contratista con quien hayan compartido mi información personal para que también elimine mi información personal de sus registros."
+        : "RIGHT TO DELETE (" + citations.RIGHT_TO_DELETE.statute + "): I request that you delete any and all personal information you have collected from me or about me. I further request that you direct any service providers or contractors with whom you have shared my personal information to delete my personal information from their records as well.");
     }
 
     if (selectedRequestTypes.indexOf("RIGHT_TO_CORRECT") !== -1) {
-      paragraphs.push("RIGHT TO CORRECT (" + citations.RIGHT_TO_CORRECT.statute + "): I request that you correct any inaccurate personal information you maintain about me. If your records contain information about me that was obtained through surveillance, data aggregation, or scraping without my knowledge or consent, I dispute the accuracy and completeness of such information in its entirety.");
+      paragraphs.push(isSpanish
+        ? "DERECHO A CORREGIR (" + citations.RIGHT_TO_CORRECT.statute + "): Solicito que corrijan cualquier información personal inexacta que mantengan sobre mí. Si sus registros contienen información sobre mí obtenida mediante vigilancia, agregación de datos o extracción automatizada sin mi conocimiento o consentimiento, impugno en su totalidad la exactitud y completitud de dicha información."
+        : "RIGHT TO CORRECT (" + citations.RIGHT_TO_CORRECT.statute + "): I request that you correct any inaccurate personal information you maintain about me. If your records contain information about me that was obtained through surveillance, data aggregation, or scraping without my knowledge or consent, I dispute the accuracy and completeness of such information in its entirety.");
     }
 
     if (selectedRequestTypes.indexOf("OPT_OUT_SALE") !== -1) {
-      paragraphs.push("OPT-OUT OF SALE AND SHARING (" + citations.OPT_OUT_SALE.statute + "): I direct you to stop selling and/or sharing my personal information with third parties, effective immediately. This includes any sharing of personal information for cross-context behavioral advertising, targeted advertising, or any form of profiling. This opt-out must be applied to all personal information you hold about me, including data obtained from any source.");
+      paragraphs.push(isSpanish
+        ? "EXCLUSIÓN DE LA VENTA Y EL INTERCAMBIO (" + citations.OPT_OUT_SALE.statute + "): Les ordeno dejar de vender y/o compartir mi información personal con terceros de inmediato. Esto incluye cualquier intercambio de información personal para publicidad conductual entre contextos, publicidad dirigida o cualquier forma de elaboración de perfiles. Esta exclusión debe aplicarse a toda la información personal que tengan sobre mí, incluida la obtenida de cualquier fuente."
+        : "OPT-OUT OF SALE AND SHARING (" + citations.OPT_OUT_SALE.statute + "): I direct you to stop selling and/or sharing my personal information with third parties, effective immediately. This includes any sharing of personal information for cross-context behavioral advertising, targeted advertising, or any form of profiling. This opt-out must be applied to all personal information you hold about me, including data obtained from any source.");
     }
 
     if (selectedRequestTypes.indexOf("LIMIT_SENSITIVE") !== -1) {
-      paragraphs.push("LIMIT USE OF SENSITIVE PERSONAL INFORMATION (" + citations.LIMIT_SENSITIVE.statute + "): I direct you to limit your use and disclosure of my sensitive personal information to only that which is necessary to perform the services or provide the goods reasonably expected. Sensitive personal information includes, but is not limited to: precise geolocation data; racial or ethnic origin; immigration or citizenship status; biometric information; and contents of communications. You are to cease any processing of my sensitive personal information beyond what is strictly necessary.");
+      paragraphs.push(isSpanish
+        ? "LIMITACIÓN DEL USO DE INFORMACIÓN PERSONAL SENSIBLE (" + citations.LIMIT_SENSITIVE.statute + "): Les ordeno limitar el uso y la divulgación de mi información personal sensible únicamente a lo necesario para prestar los servicios o proporcionar los bienes razonablemente esperados. La información personal sensible incluye, entre otras cosas: datos de geolocalización precisa; origen racial o étnico; estatus migratorio o de ciudadanía; información biométrica; y el contenido de comunicaciones. Deben cesar cualquier tratamiento de mi información personal sensible que vaya más allá de lo estrictamente necesario."
+        : "LIMIT USE OF SENSITIVE PERSONAL INFORMATION (" + citations.LIMIT_SENSITIVE.statute + "): I direct you to limit your use and disclosure of my sensitive personal information to only that which is necessary to perform the services or provide the goods reasonably expected. Sensitive personal information includes, but is not limited to: precise geolocation data; racial or ethnic origin; immigration or citizenship status; biometric information; and contents of communications. You are to cease any processing of my sensitive personal information beyond what is strictly necessary.");
     }
 
     if (selectedRequestTypes.indexOf("OPT_OUT_PROFILING") !== -1) {
-      paragraphs.push("OPT-OUT OF AUTOMATED DECISION-MAKING AND PROFILING (" + citations.OPT_OUT_PROFILING.statute + "): I opt out of any automated decision-making technology, including profiling, that you use to process my personal information. This includes any AI-powered risk scoring, predictive analytics, behavioral analysis, or pattern recognition that produces legal or similarly significant effects. I request that you stop subjecting my personal information to automated processing for these purposes immediately.");
+      paragraphs.push(isSpanish
+        ? "EXCLUSIÓN DE LA TOMA DE DECISIONES AUTOMATIZADA Y LA ELABORACIÓN DE PERFILES (" + citations.OPT_OUT_PROFILING.statute + "): Me excluyo de cualquier tecnología de toma de decisiones automatizada, incluida la elaboración de perfiles, que utilicen para tratar mi información personal. Esto incluye cualquier puntuación de riesgo impulsada por IA, análisis predictivo, análisis conductual o reconocimiento de patrones que produzca efectos legales o igualmente significativos. Solicito que dejen de someter mi información personal a procesamiento automatizado para estos fines de inmediato."
+        : "OPT-OUT OF AUTOMATED DECISION-MAKING AND PROFILING (" + citations.OPT_OUT_PROFILING.statute + "): I opt out of any automated decision-making technology, including profiling, that you use to process my personal information. This includes any AI-powered risk scoring, predictive analytics, behavioral analysis, or pattern recognition that produces legal or similarly significant effects. I request that you stop subjecting my personal information to automated processing for these purposes immediately.");
     }
 
     return paragraphs.join("\n\n");
   }
 
   function generateBatchLetter(payload) {
-    var today = formatDate(new Date(), "en");
-    var companyList = payload.companies.map(function (company) {
-      return "- " + company.name;
-    }).join("\n");
+    var lang = "en";
+    var today = formatDate(new Date(), lang);
+
+    if (lang === "es") {
+      return today + "\n\n" +
+        "A quien corresponda:\n\n" +
+        "Les escribo para ejercer mis derechos bajo la California Consumer Privacy Act de 2018 (\"CCPA\"), enmendada por la California Privacy Rights Act de 2020 (\"CPRA\"), codificada en las secciones 1798.100 a 1798.199.100 del Código Civil de California.\n\n" +
+        "Su empresa está sujeta a la CCPA/CPRA porque hace negocios en el estado de California y cumple uno o más de los umbrales de aplicabilidad establecidos en el Código Civil de California \u00A7 1798.140(d). La recopilación, el tratamiento, la venta y/o el intercambio de información personal, incluso mediante tecnologías de vigilancia, agregación de datos y sistemas automatizados de toma de decisiones, activa obligaciones bajo esta ley.\n\n" +
+        "Por medio de la presente, hago las siguientes solicitudes:\n\n" +
+        getRequestParagraphs(payload.requestTypes, lang) + "\n\n" +
+        "VERIFICACIÓN: Para verificar mi identidad en relación con esta solicitud, mi nombre es " + payload.senderName + " y mi correo electrónico es " + payload.senderEmail + ". Declaro bajo pena de perjurio que soy la persona consumidora cuya información personal es objeto de esta solicitud.\n\n" +
+        "OBLIGACIONES LEGALES Y PLAZOS: Bajo la CCPA/CPRA, ustedes deben responder a esta solicitud dentro de cuarenta y cinco (45) días calendario de su recepción. Si requieren una prórroga, deben avisarme dentro del período inicial de 45 días y solo pueden extenderlo por no más de 45 días calendario adicionales. Para solicitudes de exclusión bajo \u00A7 1798.120 y \u00A7 1798.121, deben cumplir dentro de quince (15) días hábiles.\n\n" +
+        "No pueden discriminar en mi contra por ejercer estos derechos, según lo prohíbe el Código Civil de California \u00A7 1798.125.\n\n" +
+        "AVISO DE INTENCIÓN: Si no responden a esta solicitud dentro del plazo legal, tengo la intención de presentar una queja ante la California Privacy Protection Agency (CPPA) y/o la Oficina del Fiscal General de California. Bajo la CPRA, el período de subsanación de 30 días ha sido eliminado para la mayoría de las infracciones, y la CPPA tiene autoridad independiente de ejecución con multas de hasta $2,500 por infracción, o $7,500 por infracción intencional o que involucre a menores.\n\n" +
+        "Quedo a la espera de su respuesta oportuna.\n\n" +
+        "Atentamente,\n\n" +
+        payload.senderName + "\n" +
+        payload.senderEmail;
+    }
 
     return today + "\n\n" +
       "To Whom It May Concern:\n\n" +
       "I am writing to exercise my rights under the California Consumer Privacy Act of 2018 (\"CCPA\"), as amended by the California Privacy Rights Act of 2020 (\"CPRA\"), codified at California Civil Code sections 1798.100 through 1798.199.100.\n\n" +
       "Your company is subject to the CCPA/CPRA because it does business in the State of California and meets one or more of the applicability thresholds set forth in Cal. Civ. Code \u00A7 1798.140(d). Your collection, processing, sale, and/or sharing of personal information \u2014 including through surveillance technologies, data aggregation, and automated decision-making systems \u2014 triggers obligations under this law.\n\n" +
       "I hereby make the following requests:\n\n" +
-      getRequestParagraphs(payload.requestTypes) + "\n\n" +
+      getRequestParagraphs(payload.requestTypes, lang) + "\n\n" +
       "VERIFICATION: For purposes of verifying my identity in connection with this request, my name is " + payload.senderName + " and my email address is " + payload.senderEmail + ". I declare under penalty of perjury that I am the consumer whose personal information is the subject of this request.\n\n" +
       "LEGAL OBLIGATIONS AND DEADLINES: Under the CCPA/CPRA, you are required to respond to this request within forty-five (45) calendar days of receipt. If you require an extension, you must notify me within the initial 45-day period and may extend by no more than an additional 45 calendar days. For opt-out requests under \u00A7 1798.120 and \u00A7 1798.121, you must comply within fifteen (15) business days.\n\n" +
       "You may not discriminate against me for exercising these rights, as prohibited by Cal. Civ. Code \u00A7 1798.125.\n\n" +
@@ -272,9 +312,76 @@
     }
 
     return "mailto:" + payload.senderEmail +
-      "?subject=" + encodeURIComponent(BATCH_EMAIL_SUBJECT) +
-      "&bcc=" + emails.join(",") +
+      "?subject=" + encodeURIComponent(getBatchEmailSubject(payload.lang)) +
+      "&bcc=" + encodeURIComponent(emails.join(",")) +
       "&body=" + encodeURIComponent(generateBatchLetter(payload));
+  }
+
+  function buildCurrentLetterPayload() {
+    return {
+      senderName: $("sender-name").value.trim(),
+      senderEmail: $("sender-email").value.trim(),
+      companies: selectedCompanies(),
+      requestTypes: state.selectedRights.slice(),
+      lang: state.lang
+    };
+  }
+
+  function buildLetterSummaryHtml(payload) {
+    var rightsHtml;
+    var companyNames;
+    var deadlineText;
+
+    if (payload.lang !== "es" || payload.companies.length === 0) {
+      return "";
+    }
+
+    rightsHtml = payload.requestTypes.map(function (type) {
+      return "<li>" + escapeHtml(SPANISH_RIGHT_SUMMARIES[type] || citations[type].label) + "</li>";
+    }).join("");
+    companyNames = payload.companies.map(function (company) {
+      return company.name;
+    }).join(", ");
+    deadlineText = payload.requestTypes.indexOf("OPT_OUT_SALE") !== -1 || payload.requestTypes.indexOf("LIMIT_SENSITIVE") !== -1
+      ? "La carta exige respuesta dentro de 45 dias calendario para la mayoria de los derechos y dentro de 15 dias habiles para las solicitudes de exclusion de venta/comparticion o limitacion de datos sensibles."
+      : "La carta exige respuesta dentro de 45 dias calendario.";
+
+    return "" +
+      "<p>La carta legal que se enviara sigue en ingles. Este resumen en espanol es solo para que revises lo que vas a mandar; no se agrega al correo.</p>" +
+      "<p>Esta carta va dirigida a: " + escapeHtml(companyNames) + ".</p>" +
+      "<div><p>Pide especificamente:</p><ul class=\"list-disc space-y-1 pl-5\">" + rightsHtml + "</ul></div>" +
+      "<p>Tambien te identifica con el nombre " + escapeHtml(payload.senderName || "que escribiste") + " y el correo " + escapeHtml(payload.senderEmail || "que escribiste") + " para verificar la solicitud.</p>" +
+      "<p>" + escapeHtml(deadlineText) + "</p>" +
+      "<p>Si la empresa no responde, la carta dice que podras presentar una queja ante la CPPA y la Fiscalia General de California.</p>";
+  }
+
+  function syncLetterSummaryOutput() {
+    var payload;
+
+    if (!state.generatedLetter || state.lang !== "es") {
+      $("letter-summary-body").innerHTML = "";
+      setVisible("letter-summary-panel", false);
+      return;
+    }
+
+    payload = buildCurrentLetterPayload();
+    $("letter-summary-body").innerHTML = buildLetterSummaryHtml(payload);
+    setVisible("letter-summary-panel", true);
+  }
+
+  function syncGeneratedLetterOutput() {
+    var payload;
+
+    if (!state.generatedLetter) {
+      return;
+    }
+
+    payload = buildCurrentLetterPayload();
+    state.generatedLetter = generateBatchLetter(payload);
+    $("generated-letter").value = state.generatedLetter;
+    $("print-letter-sheet").textContent = state.generatedLetter;
+    $("bcc-emails").textContent = getBatchRecipientEmails(payload.companies).join(", ");
+    syncLetterSummaryOutput();
   }
 
   function copyText(text, button, defaultLabel, copiedLabel) {
@@ -304,6 +411,7 @@
       dataBrokers: translations[lang].catDataBrokers,
       telecom: translations[lang].catTelecom
     };
+    var detailsLabel = translations[lang].companyReferences;
 
     return ["surveillance", "dataBrokers", "telecom"].map(function (category) {
       var items = companies.filter(function (company) {
@@ -313,13 +421,13 @@
         return (
           "<div class=\"company-reference-item company-card rounded-2xl border border-line bg-page/30\" data-company-item=\"" + escapeHtml(company.id) + "\">" +
             "<div class=\"company-card-row\">" +
-              "<input data-company-id=\"" + escapeHtml(company.id) + "\" type=\"checkbox\" class=\"company-card-checkbox\">" +
-              "<button type=\"button\" data-company-trigger=\"" + escapeHtml(company.id) + "\" aria-expanded=\"false\" class=\"company-reference-trigger company-card-trigger\">" +
+              "<button type=\"button\" data-company-select=\"" + escapeHtml(company.id) + "\" class=\"company-select-card\" aria-pressed=\"false\">" +
                 "<span class=\"company-card-meta\">" +
                   "<img src=\"" + logoUrl + "\" alt=\"\" width=\"32\" height=\"32\" class=\"company-card-logo\" loading=\"lazy\">" +
                   "<span class=\"company-card-name font-semibold text-ink\">" + escapeHtml(company.name) + "</span>" +
                 "</span>" +
               "</button>" +
+              "<button type=\"button\" data-company-trigger=\"" + escapeHtml(company.id) + "\" aria-expanded=\"false\" class=\"company-reference-trigger company-card-detail\">" + escapeHtml(detailsLabel) + "</button>" +
             "</div>" +
           "</div>"
         );
@@ -373,7 +481,8 @@
       overdueCompanyIds: [],
       activeTooltipId: null,
       pinnedTooltipId: null,
-      activeStepKey: "companies"
+      activeStepKey: "companies",
+      lastCountdownAnnouncementKey: ""
     };
     var stepOrder = [
       { key: "companies", id: "step-companies" },
@@ -394,6 +503,28 @@
       if (element) {
         element.classList.toggle("hidden-panel", !visible);
       }
+      if (id === "letter-output") {
+        document.body.classList.toggle("print-letter-ready", visible);
+      }
+    }
+
+    function clearLiveRegion(id) {
+      var element = $(id);
+      if (element) {
+        element.textContent = "";
+      }
+    }
+
+    function announceLiveRegion(id, message) {
+      var element = $(id);
+      if (!element || !message) {
+        return;
+      }
+
+      element.textContent = "";
+      window.setTimeout(function () {
+        element.textContent = message;
+      }, 20);
     }
 
     function setFlowState(mode) {
@@ -554,6 +685,68 @@
       return getSelectedCompanies(state.selectedCompanyIds);
     }
 
+    function isCompanySelected(companyId) {
+      return state.selectedCompanyIds.indexOf(companyId) !== -1;
+    }
+
+    function setCompanySelection(companyId, selected) {
+      if (selected) {
+        if (!isCompanySelected(companyId)) {
+          state.selectedCompanyIds.push(companyId);
+        }
+        return;
+      }
+
+      state.selectedCompanyIds = state.selectedCompanyIds.filter(function (value) {
+        return value !== companyId;
+      });
+    }
+
+    function syncCompanyCardStates(options) {
+      options = options || {};
+      var animateIds = options.animateIds || [];
+      var shouldStagger = Boolean(options.stagger) && !prefersReducedMotion();
+      var animateOrder = {};
+
+      animateIds.forEach(function (companyId, index) {
+        animateOrder[companyId] = index;
+      });
+
+      document.querySelectorAll("[data-company-select]").forEach(function (button) {
+        var companyId = button.getAttribute("data-company-select");
+        var selected = isCompanySelected(companyId);
+        var wrapper = button.closest("[data-company-item]");
+        var delay = animateOrder.hasOwnProperty(companyId)
+          ? (shouldStagger ? animateOrder[companyId] * 55 : 0)
+          : 0;
+
+        if (wrapper) {
+          wrapper.style.transitionDelay = delay + "ms";
+          wrapper.classList.toggle("is-selected", selected);
+        }
+
+        button.setAttribute("aria-pressed", selected ? "true" : "false");
+      });
+
+      if (animateIds.length) {
+        window.setTimeout(function () {
+          document.querySelectorAll("[data-company-item]").forEach(function (wrapper) {
+            wrapper.style.transitionDelay = "0ms";
+          });
+        }, (shouldStagger ? animateIds.length * 55 : 0) + 500);
+      }
+    }
+
+    function toggleCompanySelection(companyId) {
+      var selected = !isCompanySelected(companyId);
+      setCompanySelection(companyId, selected);
+      syncCompanyCardStates({
+        animateIds: selected ? [companyId] : [],
+        stagger: false
+      });
+      syncGenerateButton();
+    }
+
     function text() {
       return translations[state.lang || "en"];
     }
@@ -662,16 +855,12 @@
 
     function syncEmailLinks() {
       var copy = text();
-      var selected = selectedCompanies();
-      var payload = {
-        senderName: $("sender-name").value.trim(),
-        senderEmail: $("sender-email").value.trim(),
-        companies: selected,
-        requestTypes: state.selectedRights.slice()
-      };
-      var mailtoUrl = payload.senderName && payload.senderEmail && selected.length > 0
+      var payload = buildCurrentLetterPayload();
+      var mailtoWarning = $("mailto-length-warning");
+      var mailtoUrl = payload.senderName && payload.senderEmail && payload.companies.length > 0
         ? buildMailtoUrl(payload)
         : "";
+      var mailtoTooLong = mailtoUrl.length > MAILTO_WARNING_LENGTH;
 
       [
         { element: $("open-email"), enabledLabel: copy.openEmail },
@@ -686,6 +875,37 @@
         entry.element.setAttribute("aria-disabled", mailtoUrl ? "false" : "true");
         entry.element.classList.toggle("is-disabled-link", !mailtoUrl);
       });
+
+      if (!mailtoWarning || !state.generatedLetter || !mailtoTooLong) {
+        if (mailtoWarning) {
+          mailtoWarning.textContent = "";
+          setVisible("mailto-length-warning", false);
+        }
+        return;
+      }
+
+      mailtoWarning.textContent = copy.mailtoLengthWarning;
+      setVisible("mailto-length-warning", true);
+    }
+
+    function syncPortalOnlyWarning() {
+      var copy = text();
+      var portalOnly = selectedCompanies().filter(function (company) {
+        return !company.privacyEmail;
+      });
+
+      if (!state.generatedLetter || portalOnly.length === 0) {
+        setVisible("no-email-warning", false);
+        return;
+      }
+
+      $("no-email-warning").innerHTML = escapeHtml(copy.noEmailWarning) + " " + portalOnly.map(function (company) {
+        if (company.privacyUrl) {
+          return "<a href=\"" + escapeHtml(company.privacyUrl) + "\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"underline text-red-400 hover:text-ink\">" + escapeHtml(company.name) + "</a>";
+        }
+        return escapeHtml(company.name);
+      }).join(", ");
+      setVisible("no-email-warning", true);
     }
 
     function syncGenerateButton() {
@@ -700,7 +920,19 @@
     }
 
     function syncStartCountdownButton() {
-      $("start-countdown").disabled = !$("confirm-sent").checked;
+      $("start-countdown").disabled = $("confirm-sent").getAttribute("aria-pressed") !== "true";
+    }
+
+    function setSentConfirmation(confirmed) {
+      var button = $("confirm-sent");
+      var indicator = button.querySelector(".sent-confirm-indicator");
+
+      button.setAttribute("aria-pressed", confirmed ? "true" : "false");
+      button.classList.toggle("is-selected", confirmed);
+
+      if (indicator) {
+        indicator.textContent = confirmed ? "✓" : "+";
+      }
     }
 
     function updateOverdueButton() {
@@ -711,20 +943,10 @@
 
     function renderCompanyInputs() {
       $("company-groups").innerHTML = buildCompanyGroups(state.lang);
-      document.querySelectorAll("[data-company-id]").forEach(function (box) {
-        var companyId = box.getAttribute("data-company-id");
-        box.checked = state.selectedCompanyIds.indexOf(companyId) !== -1;
-        box.addEventListener("change", function () {
-          if (box.checked) {
-            if (state.selectedCompanyIds.indexOf(companyId) === -1) {
-              state.selectedCompanyIds.push(companyId);
-            }
-          } else {
-            state.selectedCompanyIds = state.selectedCompanyIds.filter(function (value) {
-              return value !== companyId;
-            });
-          }
-          syncGenerateButton();
+      document.querySelectorAll("[data-company-select]").forEach(function (button) {
+        var companyId = button.getAttribute("data-company-select");
+        button.addEventListener("click", function () {
+          toggleCompanySelection(companyId);
         });
       });
 
@@ -773,6 +995,7 @@
         button.addEventListener("click", function (event) {
           var rect = button.getBoundingClientRect();
           event.preventDefault();
+          event.stopPropagation();
 
           if (hasHoverPointer()) {
             showTooltip(companyId, buildCompanyTooltipHtml(companyId), rect.left + (rect.width / 2), rect.bottom, false);
@@ -787,6 +1010,8 @@
           showTooltip(companyId, buildCompanyTooltipHtml(companyId), rect.left + (rect.width / 2), rect.bottom, true);
         });
       });
+
+      syncCompanyCardStates();
     }
 
     function renderRightsInputs() {
@@ -877,6 +1102,9 @@
       var copy = text();
 
       if (!state.sentRecord) {
+        state.lastCountdownAnnouncementKey = "";
+        clearLiveRegion("countdown-live-region");
+        clearLiveRegion("countdown-alert-live-region");
         setVisible("countdown-panel", false);
         setVisible("overdue-panel", false);
         if (!state.lang) {
@@ -891,6 +1119,7 @@
       setVisible("how-it-works-panel", false);
       setVisible("generator", false);
       setVisible("letter-output", false);
+      clearLiveRegion("letter-live-region");
 
       var sentDate = new Date(state.sentRecord.sentDate);
       var totalWindowDays = getDeadlineWindowDays(sentDate, state.sentRecord.requestTypes);
@@ -899,6 +1128,9 @@
       var notifiedCompanies = getSelectedCompanies(state.sentRecord.companyIds);
 
       if (daysLeft < 0) {
+        var overdueAnnouncement = copy.overdueAnnouncement + " " + copy.overduePre + Math.abs(daysLeft) + copy.overduePost;
+        var overdueAnnouncementKey = "overdue:" + Math.abs(daysLeft) + ":" + state.lang;
+
         setVisible("countdown-panel", false);
         setVisible("overdue-panel", true);
         setFlowState("overdue");
@@ -945,8 +1177,18 @@
         });
 
         updateOverdueButton();
+        clearLiveRegion("countdown-live-region");
+        if (state.lastCountdownAnnouncementKey !== overdueAnnouncementKey) {
+          announceLiveRegion("countdown-alert-live-region", overdueAnnouncement);
+          state.lastCountdownAnnouncementKey = overdueAnnouncementKey;
+        }
         return;
       }
+
+      var countdownAnnouncement = copy.countdownActiveAnnouncement + " " + daysLeft + " " +
+        (daysLeft === 1 ? copy.dayLeft : copy.daysLeft) + ". " +
+        copy.deadline + " " + formatDate(deadlineDate, state.lang) + ".";
+      var countdownAnnouncementKey = "active:" + daysLeft + ":" + deadlineDate.toISOString().slice(0, 10) + ":" + state.lang;
 
       setVisible("overdue-panel", false);
       setVisible("countdown-panel", true);
@@ -973,6 +1215,11 @@
       var progress = ((totalWindowDays - daysLeft) / totalWindowDays) * 100;
       $("countdown-bar").style.width = Math.max(0, Math.min(100, progress)) + "%";
       $("countdown-bar").className = "h-full rounded-full " + (daysLeft <= 5 ? "bg-red-500" : (daysLeft <= 15 ? "bg-yellow-500" : "bg-green-500"));
+      clearLiveRegion("countdown-alert-live-region");
+      if (state.lastCountdownAnnouncementKey !== countdownAnnouncementKey) {
+        announceLiveRegion("countdown-live-region", countdownAnnouncement);
+        state.lastCountdownAnnouncementKey = countdownAnnouncementKey;
+      }
     }
 
     function renderTexts() {
@@ -1014,14 +1261,16 @@
       $("rights-note").textContent = copy.rightsNote;
       $("info-heading").textContent = copy.yourInfo;
       $("info-note").textContent = copy.infoNote;
+      $("identity-risk-title").textContent = copy.identityRiskTitle;
+      $("identity-risk-body").textContent = copy.identityRiskBody;
       $("name-label").textContent = copy.fullName;
       $("email-label").textContent = copy.email;
-      $("letter-heading").textContent = copy.yourLetter;
-      $("review-note").textContent = copy.reviewNote;
-      $("subject-label").textContent = copy.emailSubject + ": ";
-      $("email-subject").textContent = BATCH_EMAIL_SUBJECT;
-      $("bcc-label").textContent = copy.emailBcc + ": ";
-      $("bcc-explain").textContent = copy.bccExplain;
+        $("letter-heading").textContent = copy.yourLetter;
+        $("review-note").textContent = copy.reviewNote;
+        $("subject-label").textContent = copy.emailSubject + ": ";
+        $("email-subject").textContent = getBatchEmailSubject(state.lang);
+        $("bcc-label").textContent = copy.emailBcc + ": ";
+        $("bcc-explain").textContent = copy.bccExplain;
       $("copy-letter").textContent = copy.copy;
       $("download-letter").textContent = copy.download;
       $("send-it-step-label").textContent = copy.sendItStep;
@@ -1045,51 +1294,34 @@
       $("get-started").textContent = copy.getStarted;
       updateLanguageButtons();
 
-      renderCompanyInputs();
-      renderRightsInputs();
-      syncGenerateButton();
-      syncEmailLinks();
-      updateStepNav();
-      renderCountdown();
-    }
-
-    function generateLetter() {
-      var name = $("sender-name").value.trim();
-      var email = $("sender-email").value.trim();
-      var selected = selectedCompanies();
-      var payload = {
-        senderName: name,
-        senderEmail: email,
-        companies: selected,
-        requestTypes: state.selectedRights.slice()
-      };
-      var copy = text();
-      var portalOnly = selected.filter(function (company) {
-        return !company.privacyEmail;
-      });
-
-      state.generatedLetter = generateBatchLetter(payload);
-      $("generated-letter").value = state.generatedLetter;
-      $("bcc-emails").textContent = getBatchRecipientEmails(selected).join(", ");
-      syncEmailLinks();
-
-      if (portalOnly.length > 0) {
-        $("no-email-warning").innerHTML = escapeHtml(copy.noEmailWarning) + " " + portalOnly.map(function (company) {
-          if (company.privacyUrl) {
-            return "<a href=\"" + escapeHtml(company.privacyUrl) + "\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"underline text-red-400 hover:text-ink\">" + escapeHtml(company.name) + "</a>";
-          }
-          return escapeHtml(company.name);
-        }).join(", ");
-        setVisible("no-email-warning", true);
-      } else {
-        setVisible("no-email-warning", false);
+        renderCompanyInputs();
+        renderRightsInputs();
+        syncGenerateButton();
+        syncGeneratedLetterOutput();
+        syncEmailLinks();
+        syncPortalOnlyWarning();
+        updateStepNav();
+        renderCountdown();
       }
 
+      function generateLetter() {
+        var copy = text();
+        var payload = buildCurrentLetterPayload();
+
+        state.generatedLetter = generateBatchLetter(payload);
+        $("generated-letter").value = state.generatedLetter;
+        $("print-letter-sheet").textContent = state.generatedLetter;
+        $("bcc-emails").textContent = getBatchRecipientEmails(payload.companies).join(", ");
+        syncLetterSummaryOutput();
+        syncEmailLinks();
+        syncPortalOnlyWarning();
+
       setVisible("letter-output", true);
-      $("confirm-sent").checked = false;
-      syncStartCountdownButton();
-      updateStepNav();
-    }
+      announceLiveRegion("letter-live-region", copy.letterReadyAnnouncement);
+        setSentConfirmation(false);
+        syncStartCountdownButton();
+        updateStepNav();
+      }
 
     function resetState() {
       clearDockTimer();
@@ -1107,19 +1339,34 @@
       $("overdue-name").value = "";
       $("overdue-email").value = "";
       $("generated-letter").value = "";
+      $("print-letter-sheet").textContent = "";
       $("complaint-letter").value = "";
-      $("confirm-sent").checked = false;
+      $("letter-summary-body").innerHTML = "";
+      setSentConfirmation(false);
 
       setVisible("letter-output", false);
+      setVisible("letter-summary-panel", false);
       setVisible("complaint-output", false);
       setVisible("countdown-panel", false);
       setVisible("overdue-panel", false);
+      clearLiveRegion("letter-live-region");
+      clearLiveRegion("countdown-live-region");
+      clearLiveRegion("countdown-alert-live-region");
+      state.lastCountdownAnnouncementKey = "";
       setVisible("explanation-panel", true);
       setVisible("how-it-works-panel", false);
       setVisible("generator", false);
       state.activeStepKey = "companies";
       setFlowState("docked");
       renderTexts();
+    }
+
+    function confirmResetState() {
+      if (!window.confirm(text().startOverConfirm)) {
+        return;
+      }
+
+      resetState();
     }
 
     function setLang(lang, options) {
@@ -1163,17 +1410,29 @@
     $("get-started").addEventListener("click", revealGenerator);
 
     $("select-all-companies").addEventListener("click", function () {
+      var newlySelectedIds = companies.map(function (company) {
+        return company.id;
+      }).filter(function (companyId) {
+        return !isCompanySelected(companyId);
+      });
+
       state.selectedCompanyIds = companies.map(function (company) {
         return company.id;
       });
-      renderCompanyInputs();
+      syncCompanyCardStates({
+        animateIds: newlySelectedIds,
+        stagger: true
+      });
       syncGenerateButton();
     });
 
     $("sender-name").addEventListener("input", syncGenerateButton);
     $("sender-email").addEventListener("input", syncGenerateButton);
     $("generate-letter").addEventListener("click", generateLetter);
-    $("confirm-sent").addEventListener("change", syncStartCountdownButton);
+    $("confirm-sent").addEventListener("click", function () {
+      setSentConfirmation($("confirm-sent").getAttribute("aria-pressed") !== "true");
+      syncStartCountdownButton();
+    });
     document.querySelectorAll("[data-step-nav]").forEach(function (link) {
       link.addEventListener("click", function () {
         state.activeStepKey = link.getAttribute("data-step-nav") || "companies";
@@ -1224,8 +1483,8 @@
 
     $("overdue-name").addEventListener("input", updateOverdueButton);
     $("overdue-email").addEventListener("input", updateOverdueButton);
-    $("start-over").addEventListener("click", resetState);
-    $("start-over-overdue").addEventListener("click", resetState);
+    $("start-over").addEventListener("click", confirmResetState);
+    $("start-over-overdue").addEventListener("click", confirmResetState);
     document.addEventListener("click", function (event) {
       if (!event.target.closest("[data-company-item]") &&
           !event.target.closest("#company-reference-tooltip") &&
@@ -1405,6 +1664,14 @@
   // ==============================
   // Page-wide i18n for guide + resources
   // ==============================
+  var FOOTER_TAGLINE_STORAGE_KEY = "optout_footer_tagline_variant";
+  var FOOTER_TAGLINE_KEYS = [
+    "footer_tagline_need",
+    "footer_tagline_immigrant_rights",
+    "footer_tagline_privacy_right",
+    "footer_tagline_assert_rights"
+  ];
+  var footerTaglineKeyCache = null;
   var pageStrings = {
     // Guide page
     guide_label: { en: "Legal guide", es: "Gu\u00eda legal" },
@@ -1467,6 +1734,8 @@
     res_nav_why: { en: "Why this matters", es: "Por qu\u00e9 importa" },
     res_brokers_title: { en: "Data broker opt-outs", es: "Exclusi\u00f3n de corredores de datos" },
     res_brokers_desc: { en: "Guides and registries for removing your personal information from data brokers that sell to law enforcement and immigration agencies.", es: "Gu\u00edas y registros para eliminar tu informaci\u00f3n personal de corredores de datos que venden a agencias de inmigraci\u00f3n." },
+    res_drop_title: { en: "California DROP", es: "DROP de California" },
+    res_drop_desc: { en: "Official CalPrivacy overview of the Delete Request and Opt-out Platform (DROP), which lets Californians send one request across registered data brokers.", es: "Resumen oficial de CalPrivacy sobre la Delete Request and Opt-out Platform (DROP), que permite a residentes de California enviar una sola solicitud a los corredores de datos registrados." },
     res_advocacy_title: { en: "Advocacy and immigrant data rights", es: "Defensa y derechos de datos de inmigrantes" },
     res_advocacy_desc: { en: "Organizations documenting how commercial data is used in immigration enforcement and fighting surveillance practices.", es: "Organizaciones que documentan c\u00f3mo se usan datos comerciales en la aplicaci\u00f3n de leyes de inmigraci\u00f3n." },
     res_security_title: { en: "Digital security links", es: "Enlaces de seguridad digital" },
@@ -1480,15 +1749,47 @@
     res_inspired: { en: "Inspired by the ILRC Red Cards \u2014 know your rights, assert your rights.", es: "Inspirado en las Tarjetas Rojas del ILRC \u2014 conoce tus derechos, ejerce tus derechos." },
     landing_local_only: { en: "Nothing you type is sent to a server. Everything stays in your browser.", es: "Nada de lo que escribas se env\u00eda a un servidor. Todo permanece en tu navegador." },
     skip_to_main: { en: "Skip to main content", es: "Saltar al contenido principal" },
-    nav_letter: { en: "Letter", es: "Carta" },
-    nav_guide: { en: "Guide", es: "Gu\u00eda" },
-    nav_resources: { en: "Resources", es: "Recursos" },
-    footer_made_with_haste: { en: "Made with haste.", es: "Hecho con prisa." },
-    footer_contact: { en: "Contact", es: "Contacto" },
-    footer_source: { en: "Source", es: "C\u00f3digo fuente" },
-    // Footer
-    footer_zero: { en: "Zero data collected. Everything runs in your browser.", es: "Cero datos recopilados. Todo funciona en tu navegador." }
-  };
+      nav_letter: { en: "Letter", es: "Carta" },
+      nav_guide: { en: "Guide", es: "Gu\u00eda" },
+      nav_resources: { en: "Resources", es: "Recursos" },
+      footer_tagline_need: { en: "A tool for those who need it most.", es: "Una herramienta para quienes mas la necesitan." },
+      footer_tagline_immigrant_rights: { en: "Built for immigrant data rights.", es: "Hecha para los derechos de datos de las personas inmigrantes." },
+      footer_tagline_privacy_right: { en: "Privacy is a right, not a privilege.", es: "La privacidad es un derecho, no un privilegio." },
+      footer_tagline_assert_rights: { en: "Assert your rights. Protect your data.", es: "Haz valer tus derechos. Protege tus datos." },
+      footer_contact: { en: "Contact", es: "Contacto" },
+      footer_source: { en: "Source", es: "C\u00f3digo fuente" },
+      // Footer
+      footer_zero: { en: "Zero data collected. Everything runs in your browser.", es: "Cero datos recopilados. Todo funciona en tu navegador." }
+    };
+
+  function getFooterTaglineKey() {
+    var storedKey;
+
+    if (footerTaglineKeyCache && FOOTER_TAGLINE_KEYS.indexOf(footerTaglineKeyCache) !== -1) {
+      return footerTaglineKeyCache;
+    }
+
+    try {
+      storedKey = sessionStorage.getItem(FOOTER_TAGLINE_STORAGE_KEY);
+    } catch (_e) {
+      storedKey = null;
+    }
+
+    if (storedKey && FOOTER_TAGLINE_KEYS.indexOf(storedKey) !== -1) {
+      footerTaglineKeyCache = storedKey;
+      return storedKey;
+    }
+
+    footerTaglineKeyCache = FOOTER_TAGLINE_KEYS[Math.floor(Math.random() * FOOTER_TAGLINE_KEYS.length)];
+
+    try {
+      sessionStorage.setItem(FOOTER_TAGLINE_STORAGE_KEY, footerTaglineKeyCache);
+    } catch (_e) {
+      // Ignore storage failures and keep the in-memory choice for this page.
+    }
+
+    return footerTaglineKeyCache;
+  }
 
   function translatePage(lang) {
     document.querySelectorAll("[data-i18n]").forEach(function (el) {
@@ -1501,6 +1802,11 @@
     var footerText = document.querySelector("[data-i18n-footer]");
     if (footerText && pageStrings.footer_zero) {
       footerText.textContent = pageStrings.footer_zero[lang];
+    }
+    var footerTagline = document.querySelector("[data-i18n-footer-tagline]");
+    var footerTaglineKey = getFooterTaglineKey();
+    if (footerTagline && pageStrings[footerTaglineKey]) {
+      footerTagline.textContent = pageStrings[footerTaglineKey][lang];
     }
   }
 
