@@ -529,7 +529,7 @@
         // Clean up animation class
         window.setTimeout(function () {
           shell.classList.remove("card-entrance");
-        }, 800);
+        }, 2600);
       }, 2200);
     }
 

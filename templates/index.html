@@ -134,11 +134,15 @@
   @keyframes card-grow {
     0% {
       opacity: 0;
-      transform: translate(-50%, -50%) scale(0.05);
+      transform: translate(-50%, -50%) scale(0.02);
     }
-    60% {
+    40% {
+      opacity: 0.6;
+      transform: translate(-50%, -50%) scale(0.5);
+    }
+    80% {
       opacity: 1;
-      transform: translate(-50%, -50%) scale(1.03);
+      transform: translate(-50%, -50%) scale(1.02);
     }
     100% {
       opacity: 1;
@@ -147,7 +151,7 @@
   }
 
   #red-card-shell.card-entrance {
-    animation: card-grow 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: card-grow 2.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
   .card-lang-button,
