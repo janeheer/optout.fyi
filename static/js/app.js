@@ -1226,10 +1226,38 @@
       setVisible("countdown-companies-panel", true);
       $("notified-company-list-inline").innerHTML = notifiedCompanies.map(function (company) {
         var logoUrl = "https://www.google.com/s2/favicons?domain=" + encodeURIComponent(company.domain || "") + "&sz=32";
-        return "<span class=\"inline-flex items-center gap-2 rounded-full border border-line bg-panel/60 px-3 py-2 text-xs font-semibold text-ink\">" +
+        return "<button type=\"button\" data-countdown-company=\"" + escapeHtml(company.id) + "\" class=\"inline-flex items-center gap-2 rounded-full border border-line bg-panel/60 px-3 py-2 text-xs font-semibold text-ink transition hover:border-ice hover:text-ice cursor-pointer\">" +
           "<img src=\"" + logoUrl + "\" alt=\"\" width=\"16\" height=\"16\" class=\"shrink-0 rounded\" loading=\"lazy\">" +
-          escapeHtml(company.name) + "</span>";
+          escapeHtml(company.name) + "</button>";
       }).join("");
+
+      document.querySelectorAll("[data-countdown-company]").forEach(function (btn) {
+        var companyId = btn.getAttribute("data-countdown-company");
+        btn.addEventListener("mouseenter", function (event) {
+          if (!hasHoverPointer()) return;
+          showTooltip(companyId, buildCompanyTooltipHtml(companyId), event.clientX, event.clientY, false);
+        });
+        btn.addEventListener("mousemove", function (event) {
+          if (!hasHoverPointer() || state.pinnedTooltipId) return;
+          if (state.activeTooltipId !== companyId) {
+            showTooltip(companyId, buildCompanyTooltipHtml(companyId), event.clientX, event.clientY, false);
+            return;
+          }
+          setTooltipPosition(event.clientX, event.clientY);
+        });
+        btn.addEventListener("mouseleave", function () {
+          if (!hasHoverPointer() || state.pinnedTooltipId === companyId) return;
+          hideTooltip();
+        });
+        btn.addEventListener("click", function () {
+          var rect = btn.getBoundingClientRect();
+          if (state.pinnedTooltipId === companyId) {
+            hideTooltip();
+          } else {
+            showTooltip(companyId, buildCompanyTooltipHtml(companyId), rect.left + (rect.width / 2), rect.bottom, true);
+          }
+        });
+      });
 
       var progress = ((totalWindowDays - daysLeft) / totalWindowDays) * 100;
       $("countdown-bar").style.width = Math.max(0, Math.min(100, progress)) + "%";
