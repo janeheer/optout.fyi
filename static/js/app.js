@@ -1863,9 +1863,17 @@
         el.textContent = pageStrings.footer_zero[lang];
       }
     });
-    document.querySelectorAll("[data-i18n-footer-tagline], [data-i18n-countdown-tagline]").forEach(function (el) {
+    var footerTaglineEls = document.querySelectorAll("[data-i18n-footer-tagline]");
+    footerTaglineEls.forEach(function (el) {
       if (pageStrings[footerTaglineKey]) {
         el.textContent = pageStrings[footerTaglineKey][lang];
+      }
+    });
+    // Countdown tagline picks a fresh random phrase each page load
+    var countdownTaglineKey = FOOTER_TAGLINE_KEYS[Math.floor(Math.random() * FOOTER_TAGLINE_KEYS.length)];
+    document.querySelectorAll("[data-i18n-countdown-tagline]").forEach(function (el) {
+      if (pageStrings[countdownTaglineKey]) {
+        el.textContent = pageStrings[countdownTaglineKey][lang];
       }
     });
   }
