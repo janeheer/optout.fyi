@@ -1215,6 +1215,16 @@
       var progress = ((totalWindowDays - daysLeft) / totalWindowDays) * 100;
       $("countdown-bar").style.width = Math.max(0, Math.min(100, progress)) + "%";
       $("countdown-bar").className = "h-full rounded-full " + (daysLeft <= 5 ? "bg-red-500" : (daysLeft <= 15 ? "bg-yellow-500" : "bg-green-500"));
+      var progressRounded = Math.round(Math.max(0, Math.min(100, progress)));
+      $("countdown-bar-label").textContent = progressRounded + "% " +
+        (state.lang === "es" ? "del plazo transcurrido" : "of deadline elapsed");
+      var barContainer = $("countdown-bar").parentElement;
+      barContainer.setAttribute("role", "progressbar");
+      barContainer.setAttribute("aria-valuenow", progressRounded);
+      barContainer.setAttribute("aria-valuemin", "0");
+      barContainer.setAttribute("aria-valuemax", "100");
+      barContainer.setAttribute("aria-label",
+        state.lang === "es" ? "Progreso del plazo legal" : "Legal deadline progress");
       clearLiveRegion("countdown-alert-live-region");
       if (state.lastCountdownAnnouncementKey !== countdownAnnouncementKey) {
         announceLiveRegion("countdown-live-region", countdownAnnouncement);
